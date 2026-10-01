@@ -60,6 +60,73 @@
   padding: 0;
   overflow: hidden;
 }
+.task-change-toast {
+  position: fixed;
+  z-index: 30;
+  right: 24px;
+  bottom: 24px;
+  width: min(430px, calc(100vw - 48px));
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  color: #4d4c46;
+  background: #fff;
+  border: 1px solid #deddd6;
+  border-radius: 9px;
+  box-shadow: 0 14px 36px rgba(38, 38, 33, 0.17);
+}
+.task-change-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #6d9887;
+  background: #e7f1ec;
+  border-radius: 7px;
+}
+.task-change-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  flex: 1;
+}
+.task-change-copy strong {
+  font-size: 11px;
+}
+.task-change-copy small {
+  overflow: hidden;
+  color: #85847c;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-change-undo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  color: #c96b4e;
+  background: #fbf0ea;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.task-change-close {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #aaa9a1;
+  background: transparent;
+  border-radius: 5px;
+}
+.task-change-close:hover {
+  color: #5b5a54;
+  background: #f2f1eb;
+}
 
 @media (max-width: 1100px) {
 

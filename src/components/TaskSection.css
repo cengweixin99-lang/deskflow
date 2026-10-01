@@ -48,111 +48,70 @@ h1 {
   color: #99988f;
   font-size: 9px;
 }
-.quick-add {
-  height: 54px;
+.task-create-trigger {
+  width: 100%;
+  min-height: 64px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 14px;
+  padding: 11px 13px;
+  color: #55544e;
   background: #fff;
   border: 1px solid #e4e3dc;
   border-radius: 9px;
   box-shadow: 0 4px 14px rgba(50, 49, 43, 0.03);
+  text-align: left;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.quick-add > svg {
+.task-create-trigger:hover {
+  border-color: #d9b7a7;
+  box-shadow: 0 6px 18px rgba(50, 49, 43, 0.06);
+}
+.task-create-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
   color: #d6a078;
+  background: #fbf2ec;
+  border-radius: 8px;
 }
-.quick-add input {
+.task-create-copy {
   min-width: 0;
+  display: grid;
+  gap: 4px;
   flex: 1;
-  border: 0;
-  outline: 0;
-  color: #33332f;
-  background: transparent;
-  font-size: 13px;
 }
-.quick-add input::placeholder {
-  color: #b9b8b0;
-}
-.quick-add button {
-  padding: 8px 12px;
-  color: #fff;
-  background: #e17a5b;
-  border-radius: 6px;
-  font-size: 11px;
+.task-create-copy strong {
+  color: #44433e;
+  font-size: 12px;
   font-weight: 600;
 }
-.quick-add button:hover {
-  background: #d96d4f;
-}
-.quick-options {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin: 11px 5px 0;
+.task-create-copy small {
   color: #aaa9a1;
   font-size: 10px;
 }
-.quick-date {
+.task-create-fields {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-left: auto;
-  color: #8e8d85;
+  gap: 7px;
+  color: #8c8b83;
+  font-size: 10px;
 }
-.quick-date svg {
-  color: #d98966;
-}
-.quick-date input {
-  width: 112px;
-  padding: 4px 6px;
-  color: #686760;
+.task-create-fields > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 7px;
   background: #f3f2ed;
-  border: 1px solid transparent;
   border-radius: 5px;
-  outline: 0;
-  font-size: 10px;
-}
-.quick-date input:focus {
-  border-color: #d9a18a;
-}
-.priority-choice {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 0;
-  color: #a5a49c;
-  background: transparent;
-  font-size: 10px;
-}
-.priority-choice i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.5;
-}
-.priority-choice.selected {
-  color: #4d4c46;
-  font-weight: 600;
-}
-.priority-choice.selected i {
-  opacity: 1;
-}
-.priority-choice.high {
-  color: #df7d64;
-}
-.priority-choice.medium {
-  color: #d4a052;
-}
-.priority-choice.low {
-  color: #719c8a;
 }
 .list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 47px 0 15px;
+  margin: 36px 0 15px;
 }
 .task-filter-control {
   position: relative;
@@ -357,4 +316,9 @@ h1 {
 }
 .empty-state span {
   font-size: 11px;
+}
+@media (max-width: 560px) {
+  .task-create-fields {
+    display: none;
+  }
 }

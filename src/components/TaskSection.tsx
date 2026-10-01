@@ -1,22 +1,15 @@
-import { CalendarDays, Check, CheckCircle2, Circle, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { CalendarDays, Check, CheckCircle2, Circle, Flag, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
-import { getDateKey } from "../types";
-import type { Task, TaskFilter, TaskPriority } from "../types";
+import type { Task, TaskFilter } from "../types";
 
 interface TaskSectionProps {
   filter: TaskFilter;
   visibleTasks: Task[];
-  draft: string;
-  draftDate: string;
-  priority: TaskPriority;
   progress: number;
   onFilterChange: (filter: TaskFilter) => void;
-  onDraftChange: (value: string) => void;
-  onDraftDateChange: (value: string) => void;
-  onPriorityChange: (priority: TaskPriority) => void;
-  onAddTask: (event: FormEvent<HTMLFormElement>) => void;
+  onCreateTask: () => void;
   onToggleTask: (id: string) => void;
   onDeleteTask: (id: string) => void;
   onEditTask: (task: Task) => void;
@@ -31,15 +24,9 @@ const todayLabel = new Intl.DateTimeFormat("zh-CN", {
 export function TaskSection({
   filter,
   visibleTasks,
-  draft,
-  draftDate,
-  priority,
   progress,
   onFilterChange,
-  onDraftChange,
-  onDraftDateChange,
-  onPriorityChange,
-  onAddTask,
+  onCreateTask,
   onToggleTask,
   onDeleteTask,
   onEditTask,
@@ -70,35 +57,11 @@ export function TaskSection({
         </div>
       </div>
 
-      <form className="quick-add" id="quick-add-task" onSubmit={onAddTask}>
-        <Plus size={20} />
-        <input
-          value={draft}
-          onChange={(event) => onDraftChange(event.target.value)}
-          placeholder="添加一件新事情..."
-          aria-label="新任务"
-        />
-        <button type="submit">添加</button>
-      </form>
-      <div className="quick-options">
-        <span>优先级</span>
-        {(["high", "medium", "low"] as const).map((item) => (
-          <button
-            key={item}
-            type="button"
-            className={
-              priority === item
-                ? `priority-choice selected ${item}`
-                : `priority-choice ${item}`
-            }
-            onClick={() => onPriorityChange(item)}
-          >
-            <i />
-            {item === "high" ? "高" : item === "medium" ? "中" : "低"}
-          </button>
-        ))}
-        <label className="quick-date"><CalendarDays size={12} /><span>日期</span><input form="quick-add-task" type="date" value={draftDate} min={getDateKey()} onChange={(event) => onDraftDateChange(event.target.value)} required /></label>
-      </div>
+      <button className="task-create-trigger" type="button" onClick={onCreateTask}>
+        <span className="task-create-icon"><Plus size={20} /></span>
+        <span className="task-create-copy"><strong>添加任务</strong><small>打开完整任务编辑器</small></span>
+        <span className="task-create-fields"><span><Flag size={12} />优先级</span><span><CalendarDays size={12} />日期</span></span>
+      </button>
 
       <div className="list-header">
         <div className="task-filter-control">

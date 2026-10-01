@@ -1,29 +1,32 @@
-import { CalendarDays, ClipboardPenLine, Save, X } from "lucide-react";
+import { CalendarClock, CalendarDays, ClipboardPenLine, Plus, Save, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import "./TaskEditorModal.css";
+import { formatDateLabel, getDateKey } from "../types";
 import type { Task, TaskInput, TaskPriority } from "../types";
 
 interface TaskEditorModalProps {
-  task: Task;
+  mode: "create" | "edit";
+  task?: Task;
+  initialDate?: string;
   onClose: () => void;
-  onSave: (id: string, input: TaskInput) => void;
+  onSave: (input: TaskInput) => void;
 }
 
-export function TaskEditorModal({ task, onClose, onSave }: TaskEditorModalProps) {
-  const [title, setTitle] = useState(task.title);
-  const [priority, setPriority] = useState<TaskPriority>(task.priority);
-  const [date, setDate] = useState(task.date);
-  const [notes, setNotes] = useState(task.notes);
+export function TaskEditorModal({ mode, task, initialDate = getDateKey(), onClose, onSave }: TaskEditorModalProps) {
+  const [title, setTitle] = useState(task?.title ?? "");
+  const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? "medium");
+  const [date, setDate] = useState(task?.date ?? initialDate);
+  const [notes, setNotes] = useState(task?.notes ?? "");
   const [error, setError] = useState("");
   const titleRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setTitle(task.title);
-    setPriority(task.priority);
-    setDate(task.date);
-    setNotes(task.notes);
+    setTitle(task?.title ?? "");
+    setPriority(task?.priority ?? "medium");
+    setDate(task?.date ?? initialDate);
+    setNotes(task?.notes ?? "");
     setError("");
-  }, [task]);
+  }, [initialDate, mode, task]);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -31,7 +34,7 @@ export function TaskEditorModal({ task, onClose, onSave }: TaskEditorModalProps)
       titleRef.current?.select();
     });
     return () => cancelAnimationFrame(frame);
-  }, [task.id]);
+  }, [mode, task?.id]);
 
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
@@ -53,7 +56,7 @@ export function TaskEditorModal({ task, onClose, onSave }: TaskEditorModalProps)
       setError("请选择任务日期");
       return;
     }
-    onSave(task.id, {
+    onSave({
       title: trimmedTitle,
       priority,
       date,
@@ -62,11 +65,20 @@ export function TaskEditorModal({ task, onClose, onSave }: TaskEditorModalProps)
     onClose();
   }
 
+  const dateChanged = mode === "edit" && task && date !== task.date;
+  const dateChangeMessage = dateChanged
+    ? date === getDateKey()
+      ? "保存后，这项任务会回到“今天”列表。"
+      : task.date === getDateKey()
+        ? `保存后，这项任务会移出“今天”列表，安排到${formatDateLabel(date)}。`
+        : `保存后，这项任务会改期到${formatDateLabel(date)}。`
+    : "";
+
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section className="task-editor-modal" role="dialog" aria-modal="true" aria-labelledby="task-editor-title">
         <header className="task-editor-header">
-          <div><span className="section-kicker"><ClipboardPenLine size={15} />任务详情</span><h2 id="task-editor-title">编辑任务</h2></div>
+          <div><span className="section-kicker"><ClipboardPenLine size={15} />任务详情</span><h2 id="task-editor-title">{mode === "create" ? "添加任务" : "编辑任务"}</h2></div>
           <button className="icon-button subtle" type="button" onClick={onClose} aria-label="关闭任务编辑"><X size={17} /></button>
         </header>
         <form onSubmit={saveTask}>
@@ -87,9 +99,10 @@ export function TaskEditorModal({ task, onClose, onSave }: TaskEditorModalProps)
             </fieldset>
             <label className="task-editor-field task-editor-date">
               <span><CalendarDays size={13} />日期</span>
-              <input type="date" value={date} onChange={(event) => { setDate(event.target.value); setError(""); }} required />
+              <input type="date" value={date} min={mode === "create" ? getDateKey() : undefined} onChange={(event) => { setDate(event.target.value); setError(""); }} required />
             </label>
           </div>
+          {dateChangeMessage && <div className="task-date-change-notice"><CalendarClock size={15} /><span>{dateChangeMessage}</span></div>}
           <label className="task-editor-field">
             <span>记录</span>
             <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="记录这件事的背景、结果或下一步..." />
@@ -97,7 +110,7 @@ export function TaskEditorModal({ task, onClose, onSave }: TaskEditorModalProps)
           {error && <p className="task-editor-error" id="task-editor-error" role="alert">{error}</p>}
           <footer className="task-editor-footer">
             <span>{notes.length} 字记录</span>
-            <div><button className="cancel-button" type="button" onClick={onClose}>取消</button><button className="save-task-button" type="submit"><Save size={15} />保存任务</button></div>
+            <div><button className="cancel-button" type="button" onClick={onClose}>取消</button><button className="save-task-button" type="submit">{mode === "create" ? <Plus size={15} /> : <Save size={15} />}{mode === "create" ? "添加任务" : "保存任务"}</button></div>
           </footer>
         </form>
       </section>
