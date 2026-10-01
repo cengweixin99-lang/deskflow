@@ -1,9 +1,98 @@
+.focus-task-field {
+  display: grid;
+  gap: 7px;
+  margin-top: 18px;
+}
+.focus-task-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #77766f;
+  font-size: 10px;
+  font-weight: 600;
+}
+.focus-task-label svg {
+  color: #d98966;
+}
+.focus-task-label small {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  color: #99988f;
+  font-size: 9px;
+  font-weight: 500;
+}
+.focus-task-label small svg {
+  color: #99988f;
+}
+.focus-task-select-wrap {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.focus-task-select-wrap select {
+  width: 100%;
+  height: 36px;
+  overflow: hidden;
+  appearance: none;
+  padding: 0 32px 0 10px;
+  color: #55544e;
+  background: #fafaf7;
+  border: 1px solid #e5e4de;
+  border-radius: 7px;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.focus-task-select-wrap select:not(:disabled):hover {
+  border-color: #d7b5a6;
+}
+.focus-task-select-wrap select:focus-visible {
+  outline: 2px solid #d98966;
+  outline-offset: 2px;
+}
+.focus-task-select-wrap select:disabled {
+  color: #77766f;
+  background: #f3f2ed;
+  opacity: 1;
+  cursor: not-allowed;
+}
+.focus-task-select-wrap > svg {
+  position: absolute;
+  right: 10px;
+  color: #99988f;
+  pointer-events: none;
+}
+.focus-task-help {
+  min-height: 15px;
+  color: #aaa9a1;
+  font-size: 9px;
+  line-height: 1.55;
+}
+.focus-task-rest {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+  color: #99988f;
+  background: #fafaf7;
+  border: 1px solid #eeede7;
+  border-radius: 7px;
+  font-size: 10px;
+}
+.focus-task-rest svg {
+  color: #8aa592;
+}
 .timer-display {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  margin: 28px 0 22px;
+  margin: 22px 0;
   color: #3a3a35;
   font-size: 44px;
   font-weight: 600;
