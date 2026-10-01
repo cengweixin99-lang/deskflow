@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../lib/feeds";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
-import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskFilter, TaskPriority, TimerMode } from "../types";
+import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskFilter, TaskInput, TaskPriority, TimerMode } from "../types";
 
 export function useDeskFlow() {
   const [state, setState] = useState<AppState>(createEmptyAppState);
   const [loaded, setLoaded] = useState(false);
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
   const [draft, setDraft] = useState("");
+  const [draftDate, setDraftDate] = useState(getDateKey);
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [timerMode, setTimerMode] = useState<TimerMode>("focus");
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
@@ -89,6 +90,8 @@ export function useDeskFlow() {
     event.preventDefault();
     const title = draft.trim();
     if (!title) return;
+    const today = getDateKey();
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(draftDate) && draftDate >= today ? draftDate : today;
     setState((current) => ({
       ...current,
       tasks: [
@@ -97,7 +100,7 @@ export function useDeskFlow() {
           title,
           completed: false,
           priority,
-          date: getDateKey(),
+          date,
           notes: "",
         },
         ...current.tasks,
@@ -122,11 +125,19 @@ export function useDeskFlow() {
     }));
   }
 
-  function updateTaskNotes(id: string, notes: string) {
+  function updateTask(id: string, input: TaskInput) {
+    const title = input.title.trim();
+    if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(input.date)) return;
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((task) =>
-        task.id === id ? { ...task, notes } : task,
+        task.id === id ? {
+          ...task,
+          title,
+          priority: input.priority,
+          date: input.date,
+          notes: input.notes.trim(),
+        } : task,
       ),
     }));
   }
@@ -286,6 +297,8 @@ export function useDeskFlow() {
     setTaskFilter,
     draft,
     setDraft,
+    draftDate,
+    setDraftDate,
     priority,
     setPriority,
     timerMode,
@@ -301,7 +314,7 @@ export function useDeskFlow() {
     addTask,
     toggleTask,
     deleteTask,
-    updateTaskNotes,
+    updateTask,
     subscribeFeed,
     refreshFeeds,
     removeFeed,
