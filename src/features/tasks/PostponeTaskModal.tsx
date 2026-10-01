@@ -6,6 +6,7 @@ import "./PostponeTaskModal.css";
 import { formatDateLabel, getDateKey } from "../../types";
 import type { Task } from "../../types";
 import { useWindowModalState } from "../../hooks/useWindowModalState";
+import { DatePicker } from "./DatePicker";
 
 interface PostponeTaskModalProps {
   task: Task;
@@ -28,7 +29,7 @@ export function PostponeTaskModal({ task, onCancel, onConfirm }: PostponeTaskMod
   const [date, setDate] = useState(earliestDate);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const dateRef = useRef<HTMLInputElement>(null);
+  const dateRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function PostponeTaskModal({ task, onCancel, onConfirm }: PostponeTaskMod
   function postponeTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting) return;
-    const selectedDate = dateRef.current?.value ?? "";
+    const selectedDate = date;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(selectedDate) || selectedDate < earliestDate) {
       setError(`请选择${formatDateLabel(earliestDate)}或更晚的日期`);
       dateRef.current?.focus();
@@ -92,10 +93,10 @@ export function PostponeTaskModal({ task, onCancel, onConfirm }: PostponeTaskMod
         </header>
         <form onSubmit={postponeTask} noValidate>
           <p className="postpone-task-name">“{task.title}”</p>
-          <label className="task-editor-field task-editor-date">
-            <span><CalendarDays size={13} />新日期</span>
-            <input ref={dateRef} type="date" value={date} min={earliestDate} onInput={(event) => { setDate(event.currentTarget.value); setError(""); }} aria-describedby={error ? "postpone-task-description postpone-task-error" : "postpone-task-description"} required />
-          </label>
+          <div className="task-editor-field task-editor-date">
+            <span id="postpone-task-date-label"><CalendarDays size={13} />新日期</span>
+            <DatePicker buttonRef={dateRef} value={date} min={earliestDate} labelId="postpone-task-date-label" describedBy={error ? "postpone-task-description postpone-task-error" : "postpone-task-description"} invalid={Boolean(error)} onChange={(nextDate) => { setDate(nextDate); setError(""); }} />
+          </div>
           <div className="task-date-change-notice" id="postpone-task-description"><CalendarClock size={15} /><span>{destinationMessage}</span></div>
           {error && <p className="task-editor-error" id="postpone-task-error" role="alert">{error}</p>}
           <footer className="task-editor-footer postpone-task-footer">

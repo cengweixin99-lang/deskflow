@@ -4,6 +4,7 @@ import "./TaskEditorModal.css";
 import { formatDateLabel, getDateKey } from "../../types";
 import type { Task, TaskInput, TaskPriority } from "../../types";
 import { useWindowModalState } from "../../hooks/useWindowModalState";
+import { DatePicker } from "./DatePicker";
 
 interface TaskEditorModalProps {
   mode: "create" | "edit";
@@ -110,10 +111,10 @@ export function TaskEditorModal({ mode, task, initialDate = getDateKey(), onClos
                 ))}
               </div>
             </fieldset>
-            <label className="task-editor-field task-editor-date">
-              <span><CalendarDays size={13} />日期</span>
-              <input type="date" value={date} min={mode === "create" ? getDateKey() : undefined} onChange={(event) => { setDate(event.target.value); setError(""); }} required />
-            </label>
+            <div className="task-editor-field task-editor-date">
+              <span id="task-editor-date-label"><CalendarDays size={13} />日期</span>
+              <DatePicker value={date} min={mode === "create" ? getDateKey() : undefined} labelId="task-editor-date-label" describedBy={error ? "task-editor-error" : undefined} invalid={error === "请选择任务日期"} onChange={(nextDate) => { setDate(nextDate); setError(""); }} />
+            </div>
           </div>
           {dateChangeMessage && <div className="task-date-change-notice"><CalendarClock size={15} /><span>{dateChangeMessage}</span></div>}
           <label className="task-editor-field">
