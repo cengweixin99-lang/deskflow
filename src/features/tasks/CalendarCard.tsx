@@ -1,4 +1,4 @@
-import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Circle } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Circle, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import "./CalendarCard.css";
 import { getDateKey } from "../../types";
@@ -8,10 +8,11 @@ const weekLabels = ["一", "二", "三", "四", "五", "六", "日"];
 
 interface CalendarCardProps {
   tasks: Task[];
+  onCreateTask: (date: string) => void;
   onSelectTask: (task: Task) => void;
 }
 
-export function CalendarCard({ tasks, onSelectTask }: CalendarCardProps) {
+export function CalendarCard({ tasks, onCreateTask, onSelectTask }: CalendarCardProps) {
   const today = new Date();
   const todayKey = getDateKey(today);
   const [displayDate, setDisplayDate] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
@@ -23,6 +24,7 @@ export function CalendarCard({ tasks, onSelectTask }: CalendarCardProps) {
   const calendarDays = useMemo(() => Array.from({ length: firstDayOffset + daysInMonth }, (_, index) => index < firstDayOffset ? null : index - firstDayOffset + 1), [daysInMonth, firstDayOffset]);
   const selectedTasks = selectedDate ? tasks.filter((task) => task.date === selectedDate) : [];
   const selectedLabel = selectedDate ? new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric" }).format(new Date(`${selectedDate}T00:00:00`)) : "";
+  const canCreateTask = selectedDate !== null && selectedDate >= todayKey;
 
   function shiftMonth(offset: number) {
     setDisplayDate(new Date(year, month + offset, 1));
@@ -50,7 +52,37 @@ export function CalendarCard({ tasks, onSelectTask }: CalendarCardProps) {
           return <button key={dateKey} className={`calendar-day${isToday ? " today" : ""}${isSelected ? " selected" : ""}`} type="button" onClick={() => selectDate(dateKey)} aria-label={`查看${year}年${month + 1}月${day}日的记录`} aria-pressed={isSelected}><span>{day}</span>{hasTasks && <i className="calendar-dot visible" />}</button>;
         })}
       </div>
-      {selectedDate && <div className="history-popover"><div className="history-heading"><strong>{selectedLabel} · {selectedTasks.length} 项</strong><span>点击任务查看记录</span></div>{selectedTasks.length === 0 ? <p className="history-empty">这一天没有任务记录</p> : <div className="history-list">{selectedTasks.map((task) => <button key={task.id} className="history-item" type="button" onClick={() => onSelectTask(task)}>{task.completed ? <CheckCircle2 size={15} /> : <Circle size={15} />}<span>{task.title}</span></button>)}</div>}</div>}
+      {selectedDate && (
+        <div className="history-popover">
+          <div className="history-heading">
+            <strong>{selectedLabel} · {selectedTasks.length} 项</strong>
+            <button
+              className="history-add-button"
+              type="button"
+              disabled={!canCreateTask}
+              onClick={() => onCreateTask(selectedDate)}
+              aria-label={`为${selectedLabel}添加任务`}
+              aria-describedby={!canCreateTask ? "calendar-past-date-note" : undefined}
+              title={canCreateTask ? `为${selectedLabel}添加任务` : "过去日期不能添加计划任务"}
+            >
+              <Plus size={12} />添加任务
+            </button>
+          </div>
+          {!canCreateTask && <p className="history-create-note" id="calendar-past-date-note">过去日期仅用于查看记录，不能安排新任务。</p>}
+          {selectedTasks.length === 0 ? (
+            <p className="history-empty">这一天没有任务记录</p>
+          ) : (
+            <div className="history-list">
+              {selectedTasks.map((task) => (
+                <button key={task.id} className="history-item" type="button" onClick={() => onSelectTask(task)}>
+                  {task.completed ? <CheckCircle2 size={15} /> : <Circle size={15} />}
+                  <span>{task.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
