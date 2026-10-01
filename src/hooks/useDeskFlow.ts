@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
+import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerDurationSeconds, pauseTimerProgress, resumeTimerProgress } from "../features/focus/timer";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
 import type { AppState, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
 
-const FOCUS_DURATION_SECONDS = 25 * 60;
-const BREAK_DURATION_SECONDS = 5 * 60;
-
-interface ActiveFocusContext {
+interface ActiveTimerContext {
+  mode: TimerMode;
   taskId: string | null;
   taskTitle: string;
   startedAt: string;
+  elapsedMilliseconds: number;
+  runningSince: number | null;
 }
 
 export function useDeskFlow() {
@@ -21,7 +22,7 @@ export function useDeskFlow() {
   const [secondsLeft, setSecondsLeft] = useState(FOCUS_DURATION_SECONDS);
   const [timerRunning, setTimerRunning] = useState(false);
   const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("");
-  const [activeFocusContext, setActiveFocusContext] = useState<ActiveFocusContext | null>(null);
+  const [activeTimerContext, setActiveTimerContext] = useState<ActiveTimerContext | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedsBusy, setFeedsBusy] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
@@ -54,24 +55,27 @@ export function useDeskFlow() {
   }, [loaded]);
 
   useEffect(() => {
-    if (!timerRunning) return undefined;
-    const interval = window.setInterval(() => {
-      setSecondsLeft((current) => Math.max(0, current - 1));
-    }, 1000);
+    if (!timerRunning || !activeTimerContext?.runningSince) return undefined;
+    function updateRemainingTime() {
+      if (!activeTimerContext) return;
+      setSecondsLeft(getRemainingSeconds(getTimerDurationSeconds(activeTimerContext.mode), activeTimerContext, Date.now()));
+    }
+    updateRemainingTime();
+    const interval = window.setInterval(updateRemainingTime, 250);
     return () => window.clearInterval(interval);
-  }, [timerRunning]);
+  }, [activeTimerContext, timerRunning]);
 
   useEffect(() => {
-    if (!timerRunning || secondsLeft !== 0 || completionHandledRef.current) return;
+    if (!timerRunning || secondsLeft !== 0 || !activeTimerContext || completionHandledRef.current) return;
     completionHandledRef.current = true;
     setTimerRunning(false);
     const endedAt = new Date().toISOString();
-    if (timerMode === "focus") {
+    if (activeTimerContext.mode === "focus") {
       const session: FocusSession = {
         id: crypto.randomUUID(),
-        taskId: activeFocusContext?.taskId ?? null,
-        taskTitle: activeFocusContext?.taskTitle ?? "",
-        startedAt: activeFocusContext?.startedAt ?? new Date(Date.now() - FOCUS_DURATION_SECONDS * 1000).toISOString(),
+        taskId: activeTimerContext.taskId,
+        taskTitle: activeTimerContext.taskTitle,
+        startedAt: activeTimerContext.startedAt,
         endedAt,
         durationSeconds: FOCUS_DURATION_SECONDS,
         status: "completed",
@@ -83,15 +87,16 @@ export function useDeskFlow() {
         focusSessions: [session, ...currentState.focusSessions],
       }));
     }
-    setActiveFocusContext(null);
-    const nextMode = timerMode === "focus" ? "break" : "focus";
+    const completedMode = activeTimerContext.mode;
+    setActiveTimerContext(null);
+    const nextMode = completedMode === "focus" ? "break" : "focus";
     setTimerMode(nextMode);
-    setSecondsLeft(nextMode === "focus" ? FOCUS_DURATION_SECONDS : BREAK_DURATION_SECONDS);
+    setSecondsLeft(getTimerDurationSeconds(nextMode));
     window.desktop.showNotification({
-      title: timerMode === "focus" ? "专注完成" : "休息结束",
-      body: timerMode === "focus" ? "做得好，休息一下吧。" : "准备开始下一轮专注。",
+      title: completedMode === "focus" ? "专注完成" : "休息结束",
+      body: completedMode === "focus" ? "做得好，休息一下吧。" : "准备开始下一轮专注。",
     });
-  }, [activeFocusContext, secondsLeft, timerMode, timerRunning]);
+  }, [activeTimerContext, secondsLeft, timerRunning]);
 
   const todayTasks = useMemo(
     () => state.tasks.filter((task) => task.date === getDateKey()),
@@ -117,9 +122,9 @@ export function useDeskFlow() {
   );
 
   useEffect(() => {
-    if (activeFocusContext || !selectedFocusTaskId) return;
+    if (activeTimerContext?.mode === "focus" || !selectedFocusTaskId) return;
     if (!focusTaskOptions.some((task) => task.id === selectedFocusTaskId)) setSelectedFocusTaskId("");
-  }, [activeFocusContext, focusTaskOptions, selectedFocusTaskId]);
+  }, [activeTimerContext, focusTaskOptions, selectedFocusTaskId]);
   const visibleTasks = useMemo(() => {
     if (taskView === "upcoming") return upcomingTasks;
     if (taskView === "completed") return completedTasks;
@@ -327,40 +332,90 @@ export function useDeskFlow() {
   }
 
   function setMode(mode: TimerMode) {
+    if (activeTimerContext) return;
     setTimerMode(mode);
     setTimerRunning(false);
-    setSecondsLeft(mode === "focus" ? FOCUS_DURATION_SECONDS : BREAK_DURATION_SECONDS);
-    setActiveFocusContext(null);
+    setSecondsLeft(getTimerDurationSeconds(mode));
     completionHandledRef.current = false;
   }
 
   function resetTimer() {
+    if (activeTimerContext) return;
     setTimerRunning(false);
-    setSecondsLeft(timerMode === "focus" ? FOCUS_DURATION_SECONDS : BREAK_DURATION_SECONDS);
-    setActiveFocusContext(null);
+    setSecondsLeft(getTimerDurationSeconds(timerMode));
     completionHandledRef.current = false;
   }
 
   function selectFocusTask(taskId: string) {
-    if (activeFocusContext) return;
+    if (activeTimerContext?.mode === "focus") return;
     if (!taskId || focusTaskOptions.some((task) => task.id === taskId)) setSelectedFocusTaskId(taskId);
   }
 
   function toggleTimer() {
     if (timerRunning) {
+      if (activeTimerContext) {
+        const pausedContext = { ...activeTimerContext, ...pauseTimerProgress(activeTimerContext, Date.now()) };
+        setActiveTimerContext(pausedContext);
+        setSecondsLeft(getRemainingSeconds(getTimerDurationSeconds(pausedContext.mode), pausedContext, Date.now()));
+      }
       setTimerRunning(false);
       return;
     }
     completionHandledRef.current = false;
-    if (timerMode === "focus" && !activeFocusContext) {
-      const task = focusTaskOptions.find((item) => item.id === selectedFocusTaskId);
-      setActiveFocusContext({
-        taskId: task?.id ?? null,
-        taskTitle: task?.title ?? "",
-        startedAt: new Date().toISOString(),
-      });
+    if (activeTimerContext) {
+      setActiveTimerContext({ ...activeTimerContext, ...resumeTimerProgress(activeTimerContext, Date.now()) });
+      setTimerRunning(true);
+      return;
     }
+    const startedAt = new Date();
+    const task = timerMode === "focus" ? focusTaskOptions.find((item) => item.id === selectedFocusTaskId) : undefined;
+    setActiveTimerContext({
+      mode: timerMode,
+      taskId: task?.id ?? null,
+      taskTitle: task?.title ?? "",
+      startedAt: startedAt.toISOString(),
+      elapsedMilliseconds: 0,
+      runningSince: startedAt.getTime(),
+    });
     setTimerRunning(true);
+  }
+
+  function stopTimer() {
+    if (!activeTimerContext) return;
+    completionHandledRef.current = true;
+    const stoppedMode = activeTimerContext.mode;
+    const durationSeconds = Math.min(
+      getTimerDurationSeconds(stoppedMode),
+      getElapsedSeconds(activeTimerContext, Date.now()),
+    );
+    if (stoppedMode === "focus") {
+      const session: FocusSession = {
+        id: crypto.randomUUID(),
+        taskId: activeTimerContext.taskId,
+        taskTitle: activeTimerContext.taskTitle,
+        startedAt: activeTimerContext.startedAt,
+        endedAt: new Date().toISOString(),
+        durationSeconds,
+        status: "stopped",
+        note: "",
+      };
+      setState((currentState) => ({
+        ...currentState,
+        focusMinutes: currentState.focusMinutes + durationSeconds / 60,
+        focusSessions: [session, ...currentState.focusSessions],
+      }));
+      window.desktop.showNotification({
+        title: "本次专注已记录",
+        body: activeTimerContext.taskTitle ? `已为“${activeTimerContext.taskTitle}”记录 ${formatTimerDuration(durationSeconds)}。` : `已记录 ${formatTimerDuration(durationSeconds)}。`,
+      });
+    } else {
+      window.desktop.showNotification({ title: "休息已结束", body: "准备开始下一轮专注。" });
+    }
+    setTimerRunning(false);
+    setActiveTimerContext(null);
+    const nextMode = stoppedMode === "break" ? "focus" : stoppedMode;
+    setTimerMode(nextMode);
+    setSecondsLeft(getTimerDurationSeconds(nextMode));
   }
 
   return {
@@ -373,13 +428,16 @@ export function useDeskFlow() {
     secondsLeft,
     timerRunning,
     toggleTimer,
+    stopTimer,
     resetTimer,
     focusTaskOptions,
     selectedFocusTaskId,
     selectFocusTask,
-    focusSelectionLocked: activeFocusContext !== null,
-    activeFocusTaskId: activeFocusContext?.taskId ?? null,
-    activeFocusTaskTitle: activeFocusContext?.taskTitle ?? "",
+    timerSessionActive: activeTimerContext !== null,
+    elapsedTimerSeconds: activeTimerContext ? getTimerDurationSeconds(activeTimerContext.mode) - secondsLeft : 0,
+    focusSelectionLocked: activeTimerContext?.mode === "focus",
+    activeFocusTaskId: activeTimerContext?.mode === "focus" ? activeTimerContext.taskId : null,
+    activeFocusTaskTitle: activeTimerContext?.mode === "focus" ? activeTimerContext.taskTitle : "",
     sidebarCollapsed,
     setSidebarCollapsed,
     visibleTasks,

@@ -38,6 +38,7 @@ src/
 
 tests/
 ├── feeds.cjs
+├── focus-timer.mjs
 └── state-store.cjs
 ```
 
@@ -70,6 +71,7 @@ tests/
 当前测试数量较少，继续使用扁平的 `tests/`：
 
 - `tests/feeds.cjs`：订阅发现、解析、分页和合并回归测试。
+- `tests/focus-timer.mjs`：专注计时的时间戳推进、暂停恢复和完成边界测试。
 - `tests/state-store.cjs`：主进程存档读取、备份恢复和写入测试。
 
 测试规模尚不需要镜像源码目录。新增测试时优先按被测模块命名；只有单一领域出现多个测试文件后，再为该领域建立子目录。

@@ -207,6 +207,12 @@
   box-shadow: 0 1px 4px rgba(45, 44, 39, 0.08);
   font-weight: 600;
 }
+.timer-mode button:disabled {
+  cursor: not-allowed;
+}
+.timer-mode button:disabled:not(.selected) {
+  color: #c5c4bc;
+}
 .timer-button {
   width: 100%;
   display: flex;

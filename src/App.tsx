@@ -2,6 +2,7 @@ import { CalendarCheck2, CheckCircle2, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "./App.css";
 import { FocusCard } from "./features/focus/FocusCard";
+import { StopFocusModal } from "./features/focus/StopFocusModal";
 import { CalendarCard } from "./features/tasks/CalendarCard";
 import { Sidebar, type AppSection } from "./components/Sidebar";
 import { WindowControls } from "./components/WindowControls";
@@ -27,6 +28,7 @@ export function App() {
     input: TaskInput;
   } | null>(null);
   const [activeSection, setActiveSection] = useState<AppSection>("tasks");
+  const [stopFocusModal, setStopFocusModal] = useState<{ resumeOnCancel: boolean } | null>(null);
 
   useEffect(() => {
     if (!taskNotice) return undefined;
@@ -85,6 +87,27 @@ export function App() {
     });
   }
 
+  function requestStopTimer() {
+    if (deskFlow.timerMode === "break") {
+      deskFlow.stopTimer();
+      return;
+    }
+    const resumeOnCancel = deskFlow.timerRunning;
+    if (resumeOnCancel) deskFlow.toggleTimer();
+    setStopFocusModal({ resumeOnCancel });
+  }
+
+  function cancelStopFocus() {
+    const resumeTimer = stopFocusModal?.resumeOnCancel === true;
+    setStopFocusModal(null);
+    if (resumeTimer) deskFlow.toggleTimer();
+  }
+
+  function confirmStopFocus() {
+    deskFlow.stopTimer();
+    setStopFocusModal(null);
+  }
+
   const taskNoticeTitle = taskNotice
     ? {
         created: "任务已安排",
@@ -115,7 +138,7 @@ export function App() {
           <div className="content-grid">
             <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
             <aside className="right-column">
-              <FocusCard timerMode={deskFlow.timerMode} secondsLeft={deskFlow.secondsLeft} timerRunning={deskFlow.timerRunning} tasks={deskFlow.focusTaskOptions} selectedTaskId={deskFlow.selectedFocusTaskId} selectionLocked={deskFlow.focusSelectionLocked} activeTaskId={deskFlow.activeFocusTaskId} activeTaskTitle={deskFlow.activeFocusTaskTitle} onTaskChange={deskFlow.selectFocusTask} onModeChange={deskFlow.setMode} onReset={deskFlow.resetTimer} onToggle={deskFlow.toggleTimer} />
+              <FocusCard timerMode={deskFlow.timerMode} secondsLeft={deskFlow.secondsLeft} timerRunning={deskFlow.timerRunning} sessionActive={deskFlow.timerSessionActive} tasks={deskFlow.focusTaskOptions} selectedTaskId={deskFlow.selectedFocusTaskId} selectionLocked={deskFlow.focusSelectionLocked} activeTaskId={deskFlow.activeFocusTaskId} activeTaskTitle={deskFlow.activeFocusTaskTitle} onTaskChange={deskFlow.selectFocusTask} onModeChange={deskFlow.setMode} onReset={deskFlow.resetTimer} onStop={requestStopTimer} onToggle={deskFlow.toggleTimer} />
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
             </aside>
           </div>
@@ -125,6 +148,7 @@ export function App() {
       </main>
       {taskEditor?.mode === "create" && <TaskEditorModal mode="create" initialDate={taskEditor.initialDate} onClose={() => setTaskEditor(null)} onSave={createTask} />}
       {taskEditor?.mode === "edit" && <TaskEditorModal mode="edit" task={taskEditor.task} onClose={() => setTaskEditor(null)} onSave={(input) => updateTask(taskEditor.task, input)} />}
+      {stopFocusModal && <StopFocusModal durationSeconds={deskFlow.elapsedTimerSeconds} taskTitle={deskFlow.activeFocusTaskTitle} resumeOnCancel={stopFocusModal.resumeOnCancel} onCancel={cancelStopFocus} onConfirm={confirmStopFocus} />}
       {taskNotice && <div className="task-change-toast" role="status" aria-live="polite">
         <span className="task-change-icon">{taskNotice.kind === "completed" ? <CheckCircle2 size={17} /> : taskNotice.kind === "reopened" ? <RotateCcw size={17} /> : <CalendarCheck2 size={17} />}</span>
         <span className="task-change-copy"><strong>{taskNoticeTitle}</strong><small>{taskNoticeDetail}</small></span>

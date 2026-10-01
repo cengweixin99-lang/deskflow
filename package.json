@@ -10,8 +10,9 @@
     "start": "electron .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:state && npm run test:feeds",
+    "test": "npm run test:state && npm run test:focus && npm run test:feeds",
     "test:feeds": "node tests/feeds.cjs",
+    "test:focus": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test tests/focus-timer.mjs",
     "test:state": "node --test tests/state-store.cjs",
     "check": "npm run typecheck && npm test && npm run build"
   },
