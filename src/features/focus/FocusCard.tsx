@@ -167,7 +167,15 @@ export function FocusCard({ timerMode, secondsLeft, timerRunning, sessionActive,
       ) : (
         <div className="focus-task-rest" role={timerRestored ? "status" : undefined}><Coffee size={14} /><span>{timerRestored ? "已恢复上次休息计时" : sessionActive ? "休息计时中，右上角可以提前结束" : "休息时段不关联任务"}</span></div>
       )}
-      <div className="timer-display"><span>{minutes}</span><b>:</b><span>{seconds}</span></div>
+      <div className="timer-display" role="timer" aria-label={`剩余 ${minutes} 分 ${seconds} 秒`}>
+        <span className="timer-segment" aria-hidden="true">
+          {minutes.split("").map((digit, index) => <span className="timer-digit" key={`minute-${index}`}>{digit}</span>)}
+        </span>
+        <b aria-hidden="true">:</b>
+        <span className="timer-segment" aria-hidden="true">
+          {seconds.split("").map((digit, index) => <span className="timer-digit" key={`second-${index}`}>{digit}</span>)}
+        </span>
+      </div>
       <div className="timer-mode">
         <button className={timerMode === "focus" ? "selected" : ""} type="button" disabled={sessionActive} title={sessionActive ? "结束当前计时后可切换模式" : undefined} onClick={() => onModeChange("focus")}>专注 25</button>
         <button className={timerMode === "break" ? "selected" : ""} type="button" disabled={sessionActive} title={sessionActive ? "结束当前计时后可切换模式" : undefined} onClick={() => onModeChange("break")}>休息 5</button>

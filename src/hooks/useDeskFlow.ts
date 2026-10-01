@@ -125,7 +125,7 @@ export function useDeskFlow() {
   );
   const focusTaskOptions = useMemo(
     () => state.tasks
-      .filter((task) => !task.completed)
+      .filter((task) => !task.completed && task.date >= getDateKey())
       .sort((first, second) => first.date.localeCompare(second.date) || first.title.localeCompare(second.title, "zh-CN")),
     [state.tasks],
   );
