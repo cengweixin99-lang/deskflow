@@ -1,4 +1,4 @@
-import { CalendarCheck2, RotateCcw, X } from "lucide-react";
+import { CalendarCheck2, CheckCircle2, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "./App.css";
 import { FocusCard } from "./features/focus/FocusCard";
@@ -13,10 +13,10 @@ import { useDeskFlow } from "./hooks/useDeskFlow";
 
 export function App() {
   const deskFlow = useDeskFlow();
-  const { state, taskFilter, visibleTasks, sidebarCollapsed } = deskFlow;
-  const [taskEditor, setTaskEditor] = useState<{ mode: "create" } | { mode: "edit"; task: Task } | null>(null);
+  const { state, taskView, visibleTasks, sidebarCollapsed } = deskFlow;
+  const [taskEditor, setTaskEditor] = useState<{ mode: "create"; initialDate: string } | { mode: "edit"; task: Task } | null>(null);
   const [taskNotice, setTaskNotice] = useState<{
-    kind: "created" | "moved";
+    kind: "created" | "moved" | "completed" | "reopened";
     taskId: string;
     title: string;
     targetDate: string;
@@ -33,7 +33,7 @@ export function App() {
 
   function createTask(input: TaskInput) {
     const task = deskFlow.addTask(input);
-    if (task && task.date !== getDateKey()) {
+    if (task) {
       setTaskNotice({ kind: "created", taskId: task.id, title: task.title, targetDate: task.date, input });
     }
   }
@@ -49,11 +49,49 @@ export function App() {
     if (!taskNotice) return;
     if (taskNotice.kind === "created") {
       deskFlow.deleteTask(taskNotice.taskId);
-    } else if (taskNotice.previousDate) {
+    } else if (taskNotice.kind === "moved" && taskNotice.previousDate) {
       deskFlow.updateTask(taskNotice.taskId, { ...taskNotice.input, date: taskNotice.previousDate });
+    } else {
+      deskFlow.toggleTask(taskNotice.taskId);
     }
     setTaskNotice(null);
   }
+
+  function toggleTask(task: Task) {
+    deskFlow.toggleTask(task.id);
+    setTaskNotice({
+      kind: task.completed ? "reopened" : "completed",
+      taskId: task.id,
+      title: task.title,
+      targetDate: task.date,
+      input: {
+        title: task.title,
+        priority: task.priority,
+        date: task.date,
+        notes: task.notes,
+      },
+    });
+  }
+
+  const taskNoticeTitle = taskNotice
+    ? {
+        created: "任务已安排",
+        moved: "任务已改期",
+        completed: "任务已完成",
+        reopened: "任务已恢复",
+      }[taskNotice.kind]
+    : "";
+  const taskNoticeDetail = taskNotice
+    ? taskNotice.kind === "completed"
+      ? `“${taskNotice.title}”已移到“已完成”`
+      : taskNotice.kind === "reopened"
+        ? taskNotice.targetDate === getDateKey()
+          ? `“${taskNotice.title}”已回到“今天”`
+          : taskNotice.targetDate > getDateKey()
+            ? `“${taskNotice.title}”已回到“即将到来”`
+            : `“${taskNotice.title}”可在${formatDateLabel(taskNotice.targetDate)}的日历记录中查看`
+        : `“${taskNotice.title}”已安排到${formatDateLabel(taskNotice.targetDate)}`
+    : "";
 
   return (
     <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}${activeSection === "focus" ? " focus-shell" : ""}`}>
@@ -62,7 +100,7 @@ export function App() {
       <main className="main-content">
         {activeSection === "tasks" ? (
           <div className="content-grid">
-            <TaskSection filter={taskFilter} visibleTasks={visibleTasks} progress={deskFlow.progress} onFilterChange={deskFlow.setTaskFilter} onCreateTask={() => setTaskEditor({ mode: "create" })} onToggleTask={deskFlow.toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} />
+            <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} />
             <aside className="right-column">
               <FocusCard timerMode={deskFlow.timerMode} secondsLeft={deskFlow.secondsLeft} timerRunning={deskFlow.timerRunning} onModeChange={deskFlow.setMode} onReset={deskFlow.resetTimer} onToggle={() => deskFlow.setTimerRunning((running) => !running)} />
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
@@ -72,11 +110,11 @@ export function App() {
           <FocusReader feeds={state.feeds} groups={state.groups} articles={state.articles} feedsBusy={deskFlow.feedsBusy} subscribing={deskFlow.subscribing} onSubscribe={deskFlow.subscribeFeed} onRefresh={deskFlow.refreshFeeds} onRemoveFeed={deskFlow.removeFeed} onUpdateArticle={deskFlow.updateArticle} onAddGroup={deskFlow.addFeedGroup} onRenameGroup={deskFlow.renameFeedGroup} onRemoveGroup={deskFlow.removeFeedGroup} onSetFeedGroup={deskFlow.setFeedGroup} />
         )}
       </main>
-      {taskEditor?.mode === "create" && <TaskEditorModal mode="create" onClose={() => setTaskEditor(null)} onSave={createTask} />}
+      {taskEditor?.mode === "create" && <TaskEditorModal mode="create" initialDate={taskEditor.initialDate} onClose={() => setTaskEditor(null)} onSave={createTask} />}
       {taskEditor?.mode === "edit" && <TaskEditorModal mode="edit" task={taskEditor.task} onClose={() => setTaskEditor(null)} onSave={(input) => updateTask(taskEditor.task, input)} />}
       {taskNotice && <div className="task-change-toast" role="status" aria-live="polite">
-        <span className="task-change-icon"><CalendarCheck2 size={17} /></span>
-        <span className="task-change-copy"><strong>{taskNotice.kind === "created" ? "任务已安排" : "任务已改期"}</strong><small>“{taskNotice.title}”已安排到{formatDateLabel(taskNotice.targetDate)}</small></span>
+        <span className="task-change-icon">{taskNotice.kind === "completed" ? <CheckCircle2 size={17} /> : taskNotice.kind === "reopened" ? <RotateCcw size={17} /> : <CalendarCheck2 size={17} />}</span>
+        <span className="task-change-copy"><strong>{taskNoticeTitle}</strong><small>{taskNoticeDetail}</small></span>
         <button className="task-change-undo" type="button" onClick={undoTaskChange}><RotateCcw size={13} />撤销</button>
         <button className="task-change-close" type="button" onClick={() => setTaskNotice(null)} aria-label="关闭任务通知"><X size={14} /></button>
       </div>}
