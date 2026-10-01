@@ -60,7 +60,7 @@
   padding: 0;
   overflow: hidden;
 }
-.task-change-toast {
+.app-status-toast {
   position: fixed;
   z-index: 30;
   right: 24px;
@@ -76,7 +76,7 @@
   border-radius: 9px;
   box-shadow: 0 14px 36px rgba(38, 38, 33, 0.17);
 }
-.task-change-icon {
+.app-status-icon {
   width: 32px;
   height: 32px;
   display: grid;
@@ -86,23 +86,23 @@
   background: #e7f1ec;
   border-radius: 7px;
 }
-.task-change-copy {
+.app-status-copy {
   min-width: 0;
   display: grid;
   gap: 3px;
   flex: 1;
 }
-.task-change-copy strong {
+.app-status-copy strong {
   font-size: 11px;
 }
-.task-change-copy small {
+.app-status-copy small {
   overflow: hidden;
   color: #85847c;
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.task-change-undo {
+.app-status-action {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -113,7 +113,7 @@
   font-size: 10px;
   font-weight: 600;
 }
-.task-change-close {
+.app-status-close {
   width: 26px;
   height: 26px;
   display: grid;
@@ -123,7 +123,7 @@
   background: transparent;
   border-radius: 5px;
 }
-.task-change-close:hover {
+.app-status-close:hover {
   color: #5b5a54;
   background: #f2f1eb;
 }

@@ -1,0 +1,66 @@
+.focus-completion-modal {
+  width: min(430px, 100%);
+}
+.focus-completion-icon {
+  color: #6a9a87;
+  background: #e7f1ec;
+}
+.focus-completion-modal form {
+  display: grid;
+  margin-top: 20px;
+}
+.focus-completion-field {
+  display: grid;
+  gap: 7px;
+}
+.focus-completion-field > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #85847c;
+  font-size: 10px;
+  font-weight: 600;
+}
+.focus-completion-field > span svg {
+  color: #d98966;
+}
+.focus-completion-field textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  padding: 10px 11px;
+  color: #3f3e39;
+  background: #fafaf7;
+  border: 1px solid #e5e4de;
+  border-radius: 7px;
+  outline: 0;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.focus-completion-field textarea:focus {
+  border-color: #d9a18a;
+  box-shadow: 0 0 0 2px rgba(225, 122, 91, 0.08);
+}
+.focus-completion-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  color: #aaa9a1;
+  font-size: 9px;
+}
+.focus-completion-modal .confirm-modal-footer {
+  margin-top: 20px;
+}
+
+@media (max-width: 520px) {
+  .focus-completion-modal .confirm-modal-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+  .focus-completion-modal .cancel-button,
+  .focus-completion-modal .confirm-modal-primary {
+    width: 100%;
+  }
+}

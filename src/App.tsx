@@ -1,6 +1,7 @@
 import { CalendarCheck2, CheckCircle2, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "./App.css";
+import { FocusCompletionModal } from "./features/focus/FocusCompletionModal";
 import { FocusCard } from "./features/focus/FocusCard";
 import { StopFocusModal } from "./features/focus/StopFocusModal";
 import { CalendarCard } from "./features/tasks/CalendarCard";
@@ -29,12 +30,19 @@ export function App() {
   } | null>(null);
   const [activeSection, setActiveSection] = useState<AppSection>("tasks");
   const [stopFocusModal, setStopFocusModal] = useState<{ resumeOnCancel: boolean } | null>(null);
+  const [focusNoteNotice, setFocusNoteNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (!taskNotice) return undefined;
     const timeout = window.setTimeout(() => setTaskNotice(null), 6500);
     return () => window.clearTimeout(timeout);
   }, [taskNotice]);
+
+  useEffect(() => {
+    if (!focusNoteNotice) return undefined;
+    const timeout = window.setTimeout(() => setFocusNoteNotice(null), 6500);
+    return () => window.clearTimeout(timeout);
+  }, [focusNoteNotice]);
 
   function createTask(input: TaskInput) {
     const task = deskFlow.addTask(input);
@@ -108,6 +116,12 @@ export function App() {
     setStopFocusModal(null);
   }
 
+  function saveFocusCompletionNote(note: string) {
+    if (!deskFlow.focusCompletion) return;
+    deskFlow.saveFocusCompletionNote(deskFlow.focusCompletion.id, note);
+    setFocusNoteNotice(note.trim() ? "一句记录已写入本机专注历史。" : "本次投入已保存在本机专注历史。");
+  }
+
   const taskNoticeTitle = taskNotice
     ? {
         created: "任务已安排",
@@ -149,11 +163,17 @@ export function App() {
       {taskEditor?.mode === "create" && <TaskEditorModal mode="create" initialDate={taskEditor.initialDate} onClose={() => setTaskEditor(null)} onSave={createTask} />}
       {taskEditor?.mode === "edit" && <TaskEditorModal mode="edit" task={taskEditor.task} onClose={() => setTaskEditor(null)} onSave={(input) => updateTask(taskEditor.task, input)} />}
       {stopFocusModal && <StopFocusModal durationSeconds={deskFlow.elapsedTimerSeconds} taskTitle={deskFlow.activeFocusTaskTitle} resumeOnCancel={stopFocusModal.resumeOnCancel} onCancel={cancelStopFocus} onConfirm={confirmStopFocus} />}
-      {taskNotice && <div className="task-change-toast" role="status" aria-live="polite">
-        <span className="task-change-icon">{taskNotice.kind === "completed" ? <CheckCircle2 size={17} /> : taskNotice.kind === "reopened" ? <RotateCcw size={17} /> : <CalendarCheck2 size={17} />}</span>
-        <span className="task-change-copy"><strong>{taskNoticeTitle}</strong><small>{taskNoticeDetail}</small></span>
-        <button className="task-change-undo" type="button" onClick={undoTaskChange}><RotateCcw size={13} />撤销</button>
-        <button className="task-change-close" type="button" onClick={() => setTaskNotice(null)} aria-label="关闭任务通知"><X size={14} /></button>
+      {deskFlow.focusCompletion && !stopFocusModal && <FocusCompletionModal session={deskFlow.focusCompletion} onSkip={deskFlow.dismissFocusCompletion} onSave={saveFocusCompletionNote} />}
+      {focusNoteNotice && <div className="app-status-toast" role="status" aria-live="polite">
+        <span className="app-status-icon"><CheckCircle2 size={17} /></span>
+        <span className="app-status-copy"><strong>专注记录已保存</strong><small>{focusNoteNotice}</small></span>
+        <button className="app-status-close" type="button" onClick={() => setFocusNoteNotice(null)} aria-label="关闭专注记录通知"><X size={14} /></button>
+      </div>}
+      {taskNotice && !focusNoteNotice && !deskFlow.focusCompletion && <div className="app-status-toast" role="status" aria-live="polite">
+        <span className="app-status-icon">{taskNotice.kind === "completed" ? <CheckCircle2 size={17} /> : taskNotice.kind === "reopened" ? <RotateCcw size={17} /> : <CalendarCheck2 size={17} />}</span>
+        <span className="app-status-copy"><strong>{taskNoticeTitle}</strong><small>{taskNoticeDetail}</small></span>
+        <button className="app-status-action" type="button" onClick={undoTaskChange}><RotateCcw size={13} />撤销</button>
+        <button className="app-status-close" type="button" onClick={() => setTaskNotice(null)} aria-label="关闭任务通知"><X size={14} /></button>
       </div>}
     </div>
   );

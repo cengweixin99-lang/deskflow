@@ -38,6 +38,7 @@ src/
 
 tests/
 ├── feeds.cjs
+├── focus-sessions.mjs
 ├── focus-timer.mjs
 ├── state-migration.cjs
 └── state-store.cjs
@@ -72,6 +73,7 @@ tests/
 当前测试数量较少，继续使用扁平的 `tests/`：
 
 - `tests/feeds.cjs`：订阅发现、解析、分页和合并回归测试。
+- `tests/focus-sessions.mjs`：专注记录创建、实际投入和补充文字更新测试。
 - `tests/focus-timer.mjs`：专注计时的时间戳推进、暂停恢复、持久化归一化和完成边界测试。
 - `tests/state-migration.cjs`：存档版本迁移、活动计时恢复和异常值过滤测试。
 - `tests/state-store.cjs`：主进程存档读取、备份恢复和写入测试。
