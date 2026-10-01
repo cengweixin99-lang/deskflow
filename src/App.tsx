@@ -150,7 +150,7 @@ export function App() {
       <main className="main-content">
         {activeSection === "tasks" ? (
           <div className="content-grid">
-            <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
+            <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} focusSessions={state.focusSessions} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
             <aside className="right-column">
               <FocusCard timerMode={deskFlow.timerMode} secondsLeft={deskFlow.secondsLeft} timerRunning={deskFlow.timerRunning} sessionActive={deskFlow.timerSessionActive} timerRestored={deskFlow.timerRestored} tasks={deskFlow.focusTaskOptions} selectedTaskId={deskFlow.selectedFocusTaskId} selectionLocked={deskFlow.focusSelectionLocked} activeTaskId={deskFlow.activeFocusTaskId} activeTaskTitle={deskFlow.activeFocusTaskTitle} onTaskChange={deskFlow.selectFocusTask} onModeChange={deskFlow.setMode} onReset={deskFlow.resetTimer} onStop={requestStopTimer} onToggle={deskFlow.toggleTimer} />
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
@@ -161,7 +161,7 @@ export function App() {
         )}
       </main>
       {taskEditor?.mode === "create" && <TaskEditorModal mode="create" initialDate={taskEditor.initialDate} onClose={() => setTaskEditor(null)} onSave={createTask} />}
-      {taskEditor?.mode === "edit" && <TaskEditorModal mode="edit" task={taskEditor.task} onClose={() => setTaskEditor(null)} onSave={(input) => updateTask(taskEditor.task, input)} />}
+      {taskEditor?.mode === "edit" && <TaskEditorModal mode="edit" task={taskEditor.task} focusSessions={state.focusSessions} onClose={() => setTaskEditor(null)} onSave={(input) => updateTask(taskEditor.task, input)} />}
       {stopFocusModal && <StopFocusModal durationSeconds={deskFlow.elapsedTimerSeconds} taskTitle={deskFlow.activeFocusTaskTitle} resumeOnCancel={stopFocusModal.resumeOnCancel} onCancel={cancelStopFocus} onConfirm={confirmStopFocus} />}
       {deskFlow.focusCompletion && !stopFocusModal && <FocusCompletionModal session={deskFlow.focusCompletion} onSkip={deskFlow.dismissFocusCompletion} onSave={saveFocusCompletionNote} />}
       {focusNoteNotice && <div className="app-status-toast" role="status" aria-live="polite">
