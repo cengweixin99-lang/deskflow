@@ -1,6 +1,7 @@
 import { AlertTriangle, X } from "lucide-react";
 import { useEffect } from "react";
 import "./DeleteConfirmModal.css";
+import "../../styles/confirm-modal.css";
 import type { Task } from "../../types";
 import { useWindowModalState } from "../../hooks/useWindowModalState";
 
@@ -37,7 +38,7 @@ export function DeleteConfirmModal({ task, onCancel, onConfirm }: DeleteConfirmM
         aria-describedby="delete-confirm-description"
       >
         <header className="confirm-modal-header">
-          <span className="confirm-modal-icon" aria-hidden="true">
+          <span className="confirm-modal-icon danger" aria-hidden="true">
             <AlertTriangle size={18} />
           </span>
           <button className="icon-button subtle" type="button" onClick={onCancel} aria-label="关闭确认弹窗">
@@ -54,7 +55,7 @@ export function DeleteConfirmModal({ task, onCancel, onConfirm }: DeleteConfirmM
           <button className="cancel-button" type="button" onClick={onCancel}>
             取消
           </button>
-          <button className="confirm-delete-button" type="button" onClick={onConfirm}>
+          <button className="confirm-modal-primary danger" type="button" onClick={onConfirm}>
             删除
           </button>
         </footer>

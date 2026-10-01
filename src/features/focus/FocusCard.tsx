@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Coffee, ListTodo, LockKeyhole, Pause, Play, RotateCcw, Target } from "lucide-react";
+import { Check, ChevronDown, Coffee, ListTodo, LockKeyhole, Pause, Play, RotateCcw, Square, Target } from "lucide-react";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import "./FocusCard.css";
 import { formatDateLabel, getDateKey } from "../../types";
@@ -8,6 +8,7 @@ interface FocusCardProps {
   timerMode: TimerMode;
   secondsLeft: number;
   timerRunning: boolean;
+  sessionActive: boolean;
   tasks: Task[];
   selectedTaskId: string;
   selectionLocked: boolean;
@@ -16,10 +17,11 @@ interface FocusCardProps {
   onTaskChange: (taskId: string) => void;
   onModeChange: (mode: TimerMode) => void;
   onReset: () => void;
+  onStop: () => void;
   onToggle: () => void;
 }
 
-export function FocusCard({ timerMode, secondsLeft, timerRunning, tasks, selectedTaskId, selectionLocked, activeTaskId, activeTaskTitle, onTaskChange, onModeChange, onReset, onToggle }: FocusCardProps) {
+export function FocusCard({ timerMode, secondsLeft, timerRunning, sessionActive, tasks, selectedTaskId, selectionLocked, activeTaskId, activeTaskTitle, onTaskChange, onModeChange, onReset, onStop, onToggle }: FocusCardProps) {
   const [taskPickerOpen, setTaskPickerOpen] = useState(false);
   const taskPickerRef = useRef<HTMLDivElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
@@ -41,7 +43,10 @@ export function FocusCard({ timerMode, secondsLeft, timerRunning, tasks, selecte
     ? timerMode === "focus" ? "暂停计时" : "暂停休息"
     : timerMode === "focus"
       ? selectionLocked ? "继续专注" : "开始专注"
-      : "开始休息";
+      : sessionActive ? "继续休息" : "开始休息";
+  const headerActionLabel = sessionActive
+    ? timerMode === "focus" ? "结束本次专注" : "结束休息"
+    : "重置计时器";
 
   function openTaskPicker() {
     if (selectionLocked) return;
@@ -109,7 +114,7 @@ export function FocusCard({ timerMode, secondsLeft, timerRunning, tasks, selecte
     <section className="focus-card">
       <div className="card-heading">
         <div><span className="section-kicker"><Target size={15} />专注时段</span><h2>{timerMode === "focus" ? "专注工作" : "短暂休息"}</h2></div>
-        <button className="icon-button subtle" type="button" aria-label="重置计时器" title="重置计时器" onClick={onReset}><RotateCcw size={17} /></button>
+        <button className="icon-button subtle" type="button" aria-label={headerActionLabel} title={headerActionLabel} onClick={sessionActive ? onStop : onReset}>{sessionActive ? <Square size={14} fill="currentColor" /> : <RotateCcw size={17} />}</button>
       </div>
       {timerMode === "focus" ? (
         <div className="focus-task-field">
@@ -152,17 +157,17 @@ export function FocusCard({ timerMode, secondsLeft, timerRunning, tasks, selecte
           </div>
           <small className="focus-task-help">
             {selectionLocked
-              ? activeTaskTitle ? `本次专注已关联“${activeTaskTitle}”，重置后可重新选择。` : "本次专注未关联任务，重置后可重新选择。"
+              ? activeTaskTitle ? `本次专注已关联“${activeTaskTitle}”，暂停后可以继续。` : "本次专注未关联任务，暂停后可以继续。"
               : tasks.length ? "选择后，本次专注时间会记到对应任务。" : "暂无未完成任务，也可以直接开始无关联专注。"}
           </small>
         </div>
       ) : (
-        <div className="focus-task-rest"><Coffee size={14} /><span>休息时段不关联任务</span></div>
+        <div className="focus-task-rest"><Coffee size={14} /><span>{sessionActive ? "休息计时中，右上角可以提前结束" : "休息时段不关联任务"}</span></div>
       )}
       <div className="timer-display"><span>{minutes}</span><b>:</b><span>{seconds}</span></div>
       <div className="timer-mode">
-        <button className={timerMode === "focus" ? "selected" : ""} type="button" onClick={() => onModeChange("focus")}>专注 25</button>
-        <button className={timerMode === "break" ? "selected" : ""} type="button" onClick={() => onModeChange("break")}>休息 5</button>
+        <button className={timerMode === "focus" ? "selected" : ""} type="button" disabled={sessionActive} title={sessionActive ? "结束当前计时后可切换模式" : undefined} onClick={() => onModeChange("focus")}>专注 25</button>
+        <button className={timerMode === "break" ? "selected" : ""} type="button" disabled={sessionActive} title={sessionActive ? "结束当前计时后可切换模式" : undefined} onClick={() => onModeChange("break")}>休息 5</button>
       </div>
       <button className="timer-button" type="button" onClick={onToggle}>
         {timerRunning ? <Pause size={17} /> : <Play size={17} fill="currentColor" />}
