@@ -1,0 +1,61 @@
+.notes-modal {
+  width: min(520px, 100%);
+  padding: 22px;
+  background: #fff;
+  border: 1px solid #e2e1da;
+  border-radius: 10px;
+  box-shadow: 0 18px 50px rgba(38, 38, 33, 0.18);
+}
+.notes-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+.notes-modal-header h2 {
+  max-width: 420px;
+  margin-top: 8px;
+  color: #3e3d38;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.notes-modal textarea {
+  width: 100%;
+  min-height: 180px;
+  display: block;
+  margin-top: 22px;
+  padding: 12px;
+  resize: none;
+  color: #4b4a44;
+  background: #fafaf7;
+  border: 1px solid #e5e4de;
+  border-radius: 7px;
+  outline: 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.notes-modal textarea:focus {
+  border-color: #d9a18a;
+}
+.notes-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  color: #aaa9a1;
+  font-size: 10px;
+}
+.save-notes-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  color: #fff;
+  background: #e17a5b;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.save-notes-button:hover {
+  background: #d96d4f;
+}

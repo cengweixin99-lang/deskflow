@@ -1,0 +1,31 @@
+{
+  "name": "deskflow",
+  "version": "0.1.0",
+  "description": "A local-first personal workbench built with Electron and React",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"vite --host 127.0.0.1 --port 5173 --strictPort\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+    "build": "vite build",
+    "start": "electron .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test:feeds": "node tests/feeds.cjs",
+    "test:state": "node --test tests/state-store.cjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "electron": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {
+    "concurrently": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest",
+    "wait-on": "latest"
+  }
+}

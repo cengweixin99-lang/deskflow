@@ -1,0 +1,38 @@
+.focus-card,
+.calendar-card {
+  padding: 23px 23px 20px;
+  background: #fff;
+  border: 1px solid #e5e4de;
+  border-radius: 10px;
+}
+.card-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+.section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #a3a29a;
+  font-size: 10px;
+}
+.section-kicker svg {
+  color: #d98966;
+}
+.card-heading h2 {
+  margin-top: 8px;
+  color: #44433d;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(38, 38, 33, 0.25);
+}

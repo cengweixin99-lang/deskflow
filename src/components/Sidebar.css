@@ -1,0 +1,139 @@
+.sidebar {
+  width: 180px;
+  flex: 0 0 180px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 31px 12px 20px;
+  background: #eeeee8;
+  border-right: 1px solid #e3e2dc;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 28px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #e56b4e;
+  border-radius: 8px;
+}
+.brand-name {
+  white-space: nowrap;
+}
+.sidebar-toggle {
+  width: 100%;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: #88877f;
+  background: transparent;
+  border-top: 1px solid #deddd6;
+  border-radius: 0 0 7px 7px;
+  font-size: 11px;
+}
+.sidebar-toggle:hover {
+  color: #3b3b37;
+  background: #e3e2dc;
+}
+.primary-nav {
+  display: grid;
+  gap: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  padding: 0 12px;
+  color: #77766f;
+  background: transparent;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13px;
+}
+.nav-item:hover,
+.nav-item.active {
+  color: #252522;
+  background: #e3e2dc;
+}
+.nav-item.active {
+  font-weight: 600;
+}
+.sidebar-bottom {
+  margin-top: auto;
+}
+
+.sidebar-collapsed .sidebar {
+  width: 78px;
+  flex-basis: 78px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.sidebar-collapsed .brand {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+.sidebar-collapsed .brand-name,
+.sidebar-collapsed .nav-label,
+.sidebar-collapsed .sidebar-toggle-label {
+  display: none;
+}
+.sidebar-collapsed .sidebar-toggle {
+  width: 34px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.sidebar-collapsed .sidebar-toggle-label {
+  display: none;
+}
+.sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 0;
+}
+
+@media (max-width: 760px) {
+
+  .sidebar {
+    width: 78px;
+    flex-basis: 78px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .brand {
+    justify-content: center;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .brand-name,
+  .nav-label,
+  .sidebar-toggle-label {
+    display: none;
+  }
+
+  .sidebar-toggle {
+    width: 34px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .nav-item {
+    justify-content: center;
+    padding: 0;
+  }
+
+}

@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap");
+
+:root {
+  --window-controls-height: 36px;
+  font-family: "DM Sans", "Noto Sans SC", sans-serif;
+  color: #252522;
+  background: #f7f6f2;
+  font-synthesis: none;
+  scrollbar-color: #cfcec6 transparent;
+  scrollbar-width: thin;
+}
+* {
+  box-sizing: border-box;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: #cfcec6;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #b8b7af;
+  border-width: 1px;
+}
+body {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: #f7f6f2;
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  border: 0;
+  cursor: pointer;
+}

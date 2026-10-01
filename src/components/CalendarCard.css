@@ -1,0 +1,159 @@
+.calendar-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.calendar-heading h2 {
+  margin-top: 8px;
+  color: #44433d;
+  font-size: 14px;
+}
+.calendar-actions {
+  display: flex;
+  gap: 3px;
+}
+.calendar-nav {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: #99988f;
+  background: #f3f2ed;
+  border-radius: 6px;
+}
+.calendar-nav:hover {
+  color: #4b4a44;
+  background: #e9e8e1;
+}
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+.calendar-weekdays {
+  margin-top: 23px;
+  color: #aaa9a0;
+  font-size: 9px;
+}
+.calendar-grid {
+  row-gap: 5px;
+  margin-top: 10px;
+}
+.calendar-day {
+  width: 26px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  position: relative;
+  padding: 0;
+  color: #686761;
+  font-size: 10px;
+}
+.calendar-day.empty {
+  pointer-events: none;
+}
+.calendar-day:not(.empty) {
+  width: 26px;
+  height: 29px;
+  justify-self: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.calendar-day:not(.empty):hover,
+.calendar-day.selected {
+  color: #3f3e39;
+  background: #f2f1eb;
+}
+.calendar-day.selected {
+  width: 26px;
+  height: 29px;
+}
+.calendar-day.today {
+  width: 26px;
+  height: 29px;
+  color: #fff;
+  background: #e17a5b;
+  border-radius: 7px;
+  font-weight: 700;
+}
+.calendar-day.today:hover,
+.calendar-day.today.selected {
+  color: #fff;
+  background: #d96d4f;
+}
+.calendar-dot {
+  width: 4px;
+  height: 4px;
+  position: absolute;
+  bottom: 2px;
+  display: none;
+  background: #e17a5b;
+  border-radius: 50%;
+}
+.calendar-day.today .calendar-dot {
+  background: #fff;
+}
+.calendar-dot.visible {
+  display: block;
+}
+.history-popover {
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eeede7;
+}
+.history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.history-heading strong {
+  color: #4b4a44;
+  font-size: 11px;
+}
+.history-heading span,
+.history-empty {
+  color: #aaa9a1;
+  font-size: 9px;
+}
+.history-list {
+  display: grid;
+  gap: 3px;
+  margin-top: 9px;
+}
+.history-item {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 6px;
+  color: #686761;
+  background: transparent;
+  border-radius: 5px;
+  font-size: 10px;
+  text-align: left;
+}
+.history-item:hover {
+  background: #f2f1eb;
+}
+.history-item > span {
+  overflow: hidden;
+  flex: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-item svg:first-child {
+  flex: 0 0 auto;
+  color: #8aa592;
+}
+.history-empty {
+  margin: 11px 0 0;
+}
