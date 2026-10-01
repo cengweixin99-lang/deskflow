@@ -1,4 +1,5 @@
 import { getDateKey } from "../types";
+import { normalizeActiveTimer } from "../features/focus/timer";
 import type {
   AppState,
   DailyReflection,
@@ -12,7 +13,7 @@ import type {
   TaskPriority,
 } from "../types";
 
-export const CURRENT_SCHEMA_VERSION = 1;
+export const CURRENT_SCHEMA_VERSION = 2;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -160,15 +161,23 @@ function migrateToCurrentSchema(saved: Record<string, unknown>): Record<string, 
   if (version > CURRENT_SCHEMA_VERSION) {
     throw new Error(`存档版本 ${version} 高于当前支持的版本 ${CURRENT_SCHEMA_VERSION}`);
   }
+  let migrated = saved;
   if (version === 0) {
-    return {
+    migrated = {
       ...saved,
-      schemaVersion: CURRENT_SCHEMA_VERSION,
+      schemaVersion: 1,
       focusSessions: [],
       dailyReflections: [],
     };
   }
-  return saved;
+  if (version <= 1) {
+    migrated = {
+      ...migrated,
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      activeTimer: null,
+    };
+  }
+  return migrated;
 }
 
 export function createEmptyAppState(): AppState {
@@ -180,6 +189,7 @@ export function createEmptyAppState(): AppState {
     groups: [],
     articles: [],
     focusSessions: [],
+    activeTimer: null,
     dailyReflections: [],
   };
 }
@@ -189,6 +199,10 @@ export function migrateAppState(value: unknown): AppState {
   const today = getDateKey();
   const tasks = arrayValue(saved.tasks).map((task) => normalizeTask(task, today)).filter((task): task is Task => task !== null);
   const tasksById = new Map(tasks.map((task) => [task.id, task]));
+  const normalizedTimer = normalizeActiveTimer(saved.activeTimer);
+  const activeTimer = normalizedTimer && !normalizedTimer.taskTitle && normalizedTimer.taskId
+    ? { ...normalizedTimer, taskTitle: tasksById.get(normalizedTimer.taskId)?.title ?? "" }
+    : normalizedTimer;
   const groups = arrayValue(saved.groups).map(normalizeGroup).filter((group): group is FeedGroup => group !== null);
   const groupIds = new Set(groups.map((group) => group.id));
   const feeds = arrayValue(saved.feeds).map((feed) => normalizeFeed(feed, groupIds)).filter((feed): feed is FeedSource => feed !== null);
@@ -208,6 +222,7 @@ export function migrateAppState(value: unknown): AppState {
     groups,
     articles: arrayValue(saved.articles).map((article) => normalizeArticle(article, feedIds)).filter((article): article is FeedArticle => article !== null),
     focusSessions: arrayValue(saved.focusSessions).map((session) => normalizeFocusSession(session, tasksById)).filter((session): session is FocusSession => session !== null),
+    activeTimer,
     dailyReflections: [...reflectionsByDate.values()],
   };
 }

@@ -5,9 +5,23 @@ function isRecord(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
+function isTimestamp(value) {
+  return typeof value === 'string' && !Number.isNaN(Date.parse(value))
+}
+
+function isActiveTimerPayload(value) {
+  if (value === null) return true
+  if (!isRecord(value) || (value.mode !== 'focus' && value.mode !== 'break')) return false
+  if (value.taskId !== null && (typeof value.taskId !== 'string' || !value.taskId.trim())) return false
+  if (typeof value.taskTitle !== 'string' || !isTimestamp(value.startedAt)) return false
+  if (typeof value.elapsedMilliseconds !== 'number' || !Number.isFinite(value.elapsedMilliseconds) || value.elapsedMilliseconds < 0) return false
+  return value.runningSince === null || isTimestamp(value.runningSince)
+}
+
 function isStatePayload(value, schemaVersion) {
   if (!isRecord(value) || value.schemaVersion !== schemaVersion) return false
   if (typeof value.focusMinutes !== 'number' || !Number.isFinite(value.focusMinutes) || value.focusMinutes < 0) return false
+  if (!isActiveTimerPayload(value.activeTimer)) return false
   return ['tasks', 'feeds', 'groups', 'articles', 'focusSessions', 'dailyReflections']
     .every((key) => Array.isArray(value[key]))
 }

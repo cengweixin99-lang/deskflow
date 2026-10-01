@@ -171,7 +171,8 @@
   color: #8aa592;
 }
 .timer-display {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2ch max-content 2ch;
   justify-content: center;
   align-items: center;
   gap: 8px;
@@ -179,7 +180,16 @@
   color: #3a3a35;
   font-size: 44px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.06em;
+}
+.timer-segment {
+  display: grid;
+  grid-template-columns: repeat(2, 1ch);
+}
+.timer-digit {
+  width: 1ch;
+  text-align: center;
 }
 .timer-display b {
   color: #d7b9a7;

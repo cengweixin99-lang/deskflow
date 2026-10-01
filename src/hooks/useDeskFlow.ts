@@ -1,18 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
-import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerDurationSeconds, pauseTimerProgress, resumeTimerProgress } from "../features/focus/timer";
+import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerCompletionTime, getTimerDurationSeconds, getTimerProgress, pauseTimerProgress } from "../features/focus/timer";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
-import type { AppState, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
-
-interface ActiveTimerContext {
-  mode: TimerMode;
-  taskId: string | null;
-  taskTitle: string;
-  startedAt: string;
-  elapsedMilliseconds: number;
-  runningSince: number | null;
-}
+import type { ActiveTimerState, AppState, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
 
 export function useDeskFlow() {
   const [state, setState] = useState<AppState>(createEmptyAppState);
@@ -22,18 +13,30 @@ export function useDeskFlow() {
   const [secondsLeft, setSecondsLeft] = useState(FOCUS_DURATION_SECONDS);
   const [timerRunning, setTimerRunning] = useState(false);
   const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("");
-  const [activeTimerContext, setActiveTimerContext] = useState<ActiveTimerContext | null>(null);
+  const [timerRestored, setTimerRestored] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedsBusy, setFeedsBusy] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const completionHandledRef = useRef(false);
+  const activeTimerWasPresentRef = useRef(false);
+  const activeTimerContext = state.activeTimer;
 
   useEffect(() => {
     let cancelled = false;
     window.desktop.loadState()
       .then((saved) => {
         if (cancelled) return;
-        setState(migrateAppState(saved));
+        const migratedState = migrateAppState(saved);
+        const restoredTimer = migratedState.activeTimer;
+        setState(migratedState);
+        if (restoredTimer) {
+          const remainingSeconds = getRemainingSeconds(getTimerDurationSeconds(restoredTimer.mode), getTimerProgress(restoredTimer), Date.now());
+          setTimerMode(restoredTimer.mode);
+          setSecondsLeft(remainingSeconds);
+          setTimerRunning(restoredTimer.runningSince !== null || remainingSeconds === 0);
+          setSelectedFocusTaskId(restoredTimer.taskId ?? "");
+          setTimerRestored(true);
+        }
         setLoaded(true);
       })
       .catch((error) => console.error("无法加载 DeskFlow 存档", error));
@@ -44,9 +47,11 @@ export function useDeskFlow() {
 
   useEffect(() => {
     if (!loaded) return undefined;
+    const urgentSave = state.activeTimer !== null || activeTimerWasPresentRef.current;
+    activeTimerWasPresentRef.current = state.activeTimer !== null;
     const timeout = window.setTimeout(() => {
       void window.desktop.saveState(state).catch((error) => console.error("无法保存 DeskFlow 存档", error));
-    }, 350);
+    }, urgentSave ? 0 : 350);
     return () => window.clearTimeout(timeout);
   }, [state, loaded]);
 
@@ -58,7 +63,7 @@ export function useDeskFlow() {
     if (!timerRunning || !activeTimerContext?.runningSince) return undefined;
     function updateRemainingTime() {
       if (!activeTimerContext) return;
-      setSecondsLeft(getRemainingSeconds(getTimerDurationSeconds(activeTimerContext.mode), activeTimerContext, Date.now()));
+      setSecondsLeft(getRemainingSeconds(getTimerDurationSeconds(activeTimerContext.mode), getTimerProgress(activeTimerContext), Date.now()));
     }
     updateRemainingTime();
     const interval = window.setInterval(updateRemainingTime, 250);
@@ -69,7 +74,9 @@ export function useDeskFlow() {
     if (!timerRunning || secondsLeft !== 0 || !activeTimerContext || completionHandledRef.current) return;
     completionHandledRef.current = true;
     setTimerRunning(false);
-    const endedAt = new Date().toISOString();
+    const completedMode = activeTimerContext.mode;
+    const completionTime = getTimerCompletionTime(getTimerDurationSeconds(completedMode), getTimerProgress(activeTimerContext));
+    const endedAt = new Date(completionTime ?? Date.now()).toISOString();
     if (activeTimerContext.mode === "focus") {
       const session: FocusSession = {
         id: crypto.randomUUID(),
@@ -85,10 +92,12 @@ export function useDeskFlow() {
         ...currentState,
         focusMinutes: currentState.focusMinutes + 25,
         focusSessions: [session, ...currentState.focusSessions],
+        activeTimer: null,
       }));
+    } else {
+      setState((currentState) => ({ ...currentState, activeTimer: null }));
     }
-    const completedMode = activeTimerContext.mode;
-    setActiveTimerContext(null);
+    setTimerRestored(false);
     const nextMode = completedMode === "focus" ? "break" : "focus";
     setTimerMode(nextMode);
     setSecondsLeft(getTimerDurationSeconds(nextMode));
@@ -116,7 +125,7 @@ export function useDeskFlow() {
   );
   const focusTaskOptions = useMemo(
     () => state.tasks
-      .filter((task) => !task.completed)
+      .filter((task) => !task.completed && task.date >= getDateKey())
       .sort((first, second) => first.date.localeCompare(second.date) || first.title.localeCompare(second.title, "zh-CN")),
     [state.tasks],
   );
@@ -354,30 +363,42 @@ export function useDeskFlow() {
   function toggleTimer() {
     if (timerRunning) {
       if (activeTimerContext) {
-        const pausedContext = { ...activeTimerContext, ...pauseTimerProgress(activeTimerContext, Date.now()) };
-        setActiveTimerContext(pausedContext);
-        setSecondsLeft(getRemainingSeconds(getTimerDurationSeconds(pausedContext.mode), pausedContext, Date.now()));
+        const pausedProgress = pauseTimerProgress(getTimerProgress(activeTimerContext), Date.now());
+        const pausedTimer: ActiveTimerState = {
+          ...activeTimerContext,
+          elapsedMilliseconds: pausedProgress.elapsedMilliseconds,
+          runningSince: null,
+        };
+        setState((currentState) => ({ ...currentState, activeTimer: pausedTimer }));
+        setSecondsLeft(getRemainingSeconds(getTimerDurationSeconds(pausedTimer.mode), pausedProgress, Date.now()));
       }
       setTimerRunning(false);
+      setTimerRestored(false);
       return;
     }
     completionHandledRef.current = false;
     if (activeTimerContext) {
-      setActiveTimerContext({ ...activeTimerContext, ...resumeTimerProgress(activeTimerContext, Date.now()) });
+      setState((currentState) => ({
+        ...currentState,
+        activeTimer: currentState.activeTimer ? { ...currentState.activeTimer, runningSince: new Date().toISOString() } : null,
+      }));
       setTimerRunning(true);
+      setTimerRestored(false);
       return;
     }
     const startedAt = new Date();
     const task = timerMode === "focus" ? focusTaskOptions.find((item) => item.id === selectedFocusTaskId) : undefined;
-    setActiveTimerContext({
+    const activeTimer: ActiveTimerState = {
       mode: timerMode,
       taskId: task?.id ?? null,
       taskTitle: task?.title ?? "",
       startedAt: startedAt.toISOString(),
       elapsedMilliseconds: 0,
-      runningSince: startedAt.getTime(),
-    });
+      runningSince: startedAt.toISOString(),
+    };
+    setState((currentState) => ({ ...currentState, activeTimer }));
     setTimerRunning(true);
+    setTimerRestored(false);
   }
 
   function stopTimer() {
@@ -386,7 +407,7 @@ export function useDeskFlow() {
     const stoppedMode = activeTimerContext.mode;
     const durationSeconds = Math.min(
       getTimerDurationSeconds(stoppedMode),
-      getElapsedSeconds(activeTimerContext, Date.now()),
+      getElapsedSeconds(getTimerProgress(activeTimerContext), Date.now()),
     );
     if (stoppedMode === "focus") {
       const session: FocusSession = {
@@ -403,16 +424,18 @@ export function useDeskFlow() {
         ...currentState,
         focusMinutes: currentState.focusMinutes + durationSeconds / 60,
         focusSessions: [session, ...currentState.focusSessions],
+        activeTimer: null,
       }));
       window.desktop.showNotification({
         title: "本次专注已记录",
         body: activeTimerContext.taskTitle ? `已为“${activeTimerContext.taskTitle}”记录 ${formatTimerDuration(durationSeconds)}。` : `已记录 ${formatTimerDuration(durationSeconds)}。`,
       });
     } else {
+      setState((currentState) => ({ ...currentState, activeTimer: null }));
       window.desktop.showNotification({ title: "休息已结束", body: "准备开始下一轮专注。" });
     }
     setTimerRunning(false);
-    setActiveTimerContext(null);
+    setTimerRestored(false);
     const nextMode = stoppedMode === "break" ? "focus" : stoppedMode;
     setTimerMode(nextMode);
     setSecondsLeft(getTimerDurationSeconds(nextMode));
@@ -434,6 +457,7 @@ export function useDeskFlow() {
     selectedFocusTaskId,
     selectFocusTask,
     timerSessionActive: activeTimerContext !== null,
+    timerRestored,
     elapsedTimerSeconds: activeTimerContext ? getTimerDurationSeconds(activeTimerContext.mode) - secondsLeft : 0,
     focusSelectionLocked: activeTimerContext?.mode === "focus",
     activeFocusTaskId: activeTimerContext?.mode === "focus" ? activeTimerContext.taskId : null,

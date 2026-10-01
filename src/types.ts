@@ -55,6 +55,15 @@ export interface FocusSession {
   note: string;
 }
 
+export interface ActiveTimerState {
+  mode: TimerMode;
+  taskId: string | null;
+  taskTitle: string;
+  startedAt: string;
+  elapsedMilliseconds: number;
+  runningSince: string | null;
+}
+
 export interface DailyReflection {
   date: string;
   summary: string;
@@ -84,6 +93,7 @@ export interface AppState {
   groups: FeedGroup[];
   articles: FeedArticle[];
   focusSessions: FocusSession[];
+  activeTimer: ActiveTimerState | null;
   dailyReflections: DailyReflection[];
 }
 
