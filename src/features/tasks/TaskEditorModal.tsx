@@ -1,8 +1,9 @@
-import { CalendarClock, CalendarDays, ClipboardPenLine, Plus, Save, X } from "lucide-react";
+import { CalendarClock, CalendarDays, ClipboardPenLine, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import "./TaskEditorModal.css";
 import { formatDateLabel, getDateKey } from "../../types";
 import type { Task, TaskInput, TaskPriority } from "../../types";
+import { useWindowModalState } from "../../hooks/useWindowModalState";
 
 interface TaskEditorModalProps {
   mode: "create" | "edit";
@@ -13,6 +14,7 @@ interface TaskEditorModalProps {
 }
 
 export function TaskEditorModal({ mode, task, initialDate = getDateKey(), onClose, onSave }: TaskEditorModalProps) {
+  useWindowModalState();
   const [title, setTitle] = useState(task?.title ?? "");
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? "medium");
   const [date, setDate] = useState(task?.date ?? initialDate);
@@ -110,7 +112,7 @@ export function TaskEditorModal({ mode, task, initialDate = getDateKey(), onClos
           {error && <p className="task-editor-error" id="task-editor-error" role="alert">{error}</p>}
           <footer className="task-editor-footer">
             <span>{notes.length} 字记录</span>
-            <div><button className="cancel-button" type="button" onClick={onClose}>取消</button><button className="save-task-button" type="submit">{mode === "create" ? <Plus size={15} /> : <Save size={15} />}{mode === "create" ? "添加任务" : "保存任务"}</button></div>
+            <div><button className="cancel-button" type="button" onClick={onClose}>取消</button><button className="save-task-button" type="submit">{mode === "create" && <Plus size={15} />}{mode === "create" ? "添加任务" : "保存任务"}</button></div>
           </footer>
         </form>
       </section>

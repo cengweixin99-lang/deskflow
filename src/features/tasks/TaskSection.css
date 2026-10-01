@@ -222,6 +222,7 @@ h1 {
   font-size: 10px;
 }
 .task-item {
+  min-width: 0;
   min-height: 56px;
   display: flex;
   align-items: center;
@@ -306,7 +307,13 @@ h1 {
 .priority-line.low {
   background: #71a08d;
 }
-.edit-button {
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+.task-action-button {
   width: 28px;
   height: 28px;
   display: grid;
@@ -316,31 +323,22 @@ h1 {
   background: transparent;
   border-radius: 6px;
   opacity: 0;
+  pointer-events: none;
+  transition: color 0.16s, background 0.16s, opacity 0.16s;
 }
-.task-item:hover .edit-button,
-.edit-button:focus-visible {
+.task-item:hover .task-action-button,
+.task-item:focus-within .task-action-button,
+.task-action-button:focus-visible {
   opacity: 1;
+  pointer-events: auto;
 }
-.edit-button:hover {
+.task-action-button:hover {
   color: #d38a61;
   background: #fbf1eb;
 }
-.delete-button {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  color: #c5c3bb;
-  background: transparent;
-  border-radius: 6px;
-  opacity: 0;
-}
-.task-item:hover .delete-button {
-  opacity: 1;
-}
-.delete-button:hover {
-  color: #cf6c5b;
-  background: #fbeeea;
+.task-action-button:focus-visible {
+  outline: 2px solid #d98966;
+  outline-offset: 2px;
 }
 .empty-state {
   display: grid;

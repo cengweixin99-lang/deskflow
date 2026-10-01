@@ -1,7 +1,8 @@
-import { CalendarDays, Check, CheckCircle2, Circle, Flag, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, CalendarDays, Check, CheckCircle2, Circle, Flag, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { PostponeTaskModal } from "./PostponeTaskModal";
 import { formatDateLabel, getDateKey } from "../../types";
 import type { Task, TaskView } from "../../types";
 
@@ -15,6 +16,7 @@ interface TaskSectionProps {
   onToggleTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
   onEditTask: (task: Task) => void;
+  onPostponeTask: (task: Task, date: string) => void;
 }
 
 const viewLabels: Record<TaskView, string> = {
@@ -70,8 +72,10 @@ export function TaskSection({
   onToggleTask,
   onDeleteTask,
   onEditTask,
+  onPostponeTask,
 }: TaskSectionProps) {
   const [pendingDelete, setPendingDelete] = useState<Task | null>(null);
+  const [pendingPostpone, setPendingPostpone] = useState<Task | null>(null);
   const todayLabel = new Intl.DateTimeFormat("zh-CN", {
     weekday: "long",
     month: "long",
@@ -146,7 +150,7 @@ export function TaskSection({
       ) : view === "today" ? (
         <div className="task-list">
           {visibleTasks.map((task) => (
-            <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} />
+            <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
           ))}
         </div>
       ) : (
@@ -159,7 +163,7 @@ export function TaskSection({
               </div>
               <div className="task-list">
                 {group.tasks.map((task) => (
-                  <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} />
+                  <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
                 ))}
               </div>
             </section>
@@ -176,6 +180,13 @@ export function TaskSection({
           }}
         />
       )}
+      {pendingPostpone && (
+        <PostponeTaskModal
+          task={pendingPostpone}
+          onCancel={() => setPendingPostpone(null)}
+          onConfirm={(date) => onPostponeTask(pendingPostpone, date)}
+        />
+      )}
     </section>
   );
 }
@@ -185,11 +196,13 @@ function TaskItem({
   onToggle,
   onDelete,
   onEdit,
+  onPostpone,
 }: {
   task: Task;
   onToggle: (task: Task) => void;
   onDelete: (task: Task) => void;
   onEdit: (task: Task) => void;
+  onPostpone: (task: Task) => void;
 }) {
   return (
     <article className={task.completed ? "task-item completed" : "task-item"}>
@@ -207,17 +220,21 @@ function TaskItem({
           <span className={`priority-line ${task.priority}`} />
         </div>
       </div>
-      <button className="edit-button" type="button" onClick={() => onEdit(task)} aria-label={`编辑“${task.title}”`} title="编辑任务">
-        <Pencil size={15} />
-      </button>
-      <button
-        type="button"
-        className="delete-button"
-        onClick={() => onDelete(task)}
-        aria-label={`删除“${task.title}”`}
-      >
-        <Trash2 size={16} />
-      </button>
+      <div className="task-actions">
+        {!task.completed && <button className="task-action-button postpone-button" type="button" onClick={() => onPostpone(task)} aria-label={`推迟“${task.title}”`} title="推迟任务"><CalendarClock size={15} /></button>}
+        <button className="task-action-button edit-button" type="button" onClick={() => onEdit(task)} aria-label={`编辑“${task.title}”`} title="编辑任务">
+          <Pencil size={15} />
+        </button>
+        <button
+          type="button"
+          className="task-action-button delete-button"
+          onClick={() => onDelete(task)}
+          aria-label={`删除“${task.title}”`}
+          title="删除任务"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
     </article>
   );
 }

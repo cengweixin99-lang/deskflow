@@ -1,0 +1,40 @@
+.window-controls {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  right: 0;
+  height: var(--window-controls-height);
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+.window-control-button {
+  width: 46px;
+  height: var(--window-controls-height);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #77766f;
+  background: transparent;
+  border-radius: 0;
+}
+.window-controls.modal-active .window-control-button {
+  color: #63625c;
+}
+.window-control-button:not(:disabled):hover {
+  color: #3e3d38;
+  background: #e8e7e1;
+}
+.window-control-button.close:not(:disabled):hover {
+  color: #fff;
+  background: #c85d42;
+}
+.window-control-button:focus-visible {
+  position: relative;
+  z-index: 2;
+  outline: 2px solid #d98966;
+  outline-offset: -3px;
+}
+.window-control-button:disabled {
+  cursor: default;
+  opacity: 1;
+}
