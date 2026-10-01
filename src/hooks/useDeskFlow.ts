@@ -1,19 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
-import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskInput, TaskView, TimerMode } from "../types";
+import type { AppState, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
+
+const FOCUS_DURATION_SECONDS = 25 * 60;
+const BREAK_DURATION_SECONDS = 5 * 60;
+
+interface ActiveFocusContext {
+  taskId: string | null;
+  taskTitle: string;
+  startedAt: string;
+}
 
 export function useDeskFlow() {
   const [state, setState] = useState<AppState>(createEmptyAppState);
   const [loaded, setLoaded] = useState(false);
   const [taskView, setTaskView] = useState<TaskView>("today");
   const [timerMode, setTimerMode] = useState<TimerMode>("focus");
-  const [secondsLeft, setSecondsLeft] = useState(25 * 60);
+  const [secondsLeft, setSecondsLeft] = useState(FOCUS_DURATION_SECONDS);
   const [timerRunning, setTimerRunning] = useState(false);
+  const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("");
+  const [activeFocusContext, setActiveFocusContext] = useState<ActiveFocusContext | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedsBusy, setFeedsBusy] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const completionHandledRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,29 +56,42 @@ export function useDeskFlow() {
   useEffect(() => {
     if (!timerRunning) return undefined;
     const interval = window.setInterval(() => {
-      setSecondsLeft((current) => {
-        if (current <= 1) {
-          setTimerRunning(false);
-          if (timerMode === "focus") {
-            setState((currentState) => ({
-              ...currentState,
-              focusMinutes: currentState.focusMinutes + 25,
-            }));
-          }
-          window.desktop.showNotification({
-            title: "专注完成",
-            body:
-              timerMode === "focus"
-                ? "做得好，休息一下吧。"
-                : "休息结束，准备开始下一轮。",
-          });
-          return timerMode === "focus" ? 5 * 60 : 25 * 60;
-        }
-        return current - 1;
-      });
+      setSecondsLeft((current) => Math.max(0, current - 1));
     }, 1000);
     return () => window.clearInterval(interval);
-  }, [timerRunning, timerMode]);
+  }, [timerRunning]);
+
+  useEffect(() => {
+    if (!timerRunning || secondsLeft !== 0 || completionHandledRef.current) return;
+    completionHandledRef.current = true;
+    setTimerRunning(false);
+    const endedAt = new Date().toISOString();
+    if (timerMode === "focus") {
+      const session: FocusSession = {
+        id: crypto.randomUUID(),
+        taskId: activeFocusContext?.taskId ?? null,
+        taskTitle: activeFocusContext?.taskTitle ?? "",
+        startedAt: activeFocusContext?.startedAt ?? new Date(Date.now() - FOCUS_DURATION_SECONDS * 1000).toISOString(),
+        endedAt,
+        durationSeconds: FOCUS_DURATION_SECONDS,
+        status: "completed",
+        note: "",
+      };
+      setState((currentState) => ({
+        ...currentState,
+        focusMinutes: currentState.focusMinutes + 25,
+        focusSessions: [session, ...currentState.focusSessions],
+      }));
+    }
+    setActiveFocusContext(null);
+    const nextMode = timerMode === "focus" ? "break" : "focus";
+    setTimerMode(nextMode);
+    setSecondsLeft(nextMode === "focus" ? FOCUS_DURATION_SECONDS : BREAK_DURATION_SECONDS);
+    window.desktop.showNotification({
+      title: timerMode === "focus" ? "专注完成" : "休息结束",
+      body: timerMode === "focus" ? "做得好，休息一下吧。" : "准备开始下一轮专注。",
+    });
+  }, [activeFocusContext, secondsLeft, timerMode, timerRunning]);
 
   const todayTasks = useMemo(
     () => state.tasks.filter((task) => task.date === getDateKey()),
@@ -84,6 +109,17 @@ export function useDeskFlow() {
       .sort((first, second) => second.date.localeCompare(first.date)),
     [state.tasks],
   );
+  const focusTaskOptions = useMemo(
+    () => state.tasks
+      .filter((task) => !task.completed)
+      .sort((first, second) => first.date.localeCompare(second.date) || first.title.localeCompare(second.title, "zh-CN")),
+    [state.tasks],
+  );
+
+  useEffect(() => {
+    if (activeFocusContext || !selectedFocusTaskId) return;
+    if (!focusTaskOptions.some((task) => task.id === selectedFocusTaskId)) setSelectedFocusTaskId("");
+  }, [activeFocusContext, focusTaskOptions, selectedFocusTaskId]);
   const visibleTasks = useMemo(() => {
     if (taskView === "upcoming") return upcomingTasks;
     if (taskView === "completed") return completedTasks;
@@ -293,12 +329,38 @@ export function useDeskFlow() {
   function setMode(mode: TimerMode) {
     setTimerMode(mode);
     setTimerRunning(false);
-    setSecondsLeft(mode === "focus" ? 25 * 60 : 5 * 60);
+    setSecondsLeft(mode === "focus" ? FOCUS_DURATION_SECONDS : BREAK_DURATION_SECONDS);
+    setActiveFocusContext(null);
+    completionHandledRef.current = false;
   }
 
   function resetTimer() {
     setTimerRunning(false);
-    setSecondsLeft(timerMode === "focus" ? 25 * 60 : 5 * 60);
+    setSecondsLeft(timerMode === "focus" ? FOCUS_DURATION_SECONDS : BREAK_DURATION_SECONDS);
+    setActiveFocusContext(null);
+    completionHandledRef.current = false;
+  }
+
+  function selectFocusTask(taskId: string) {
+    if (activeFocusContext) return;
+    if (!taskId || focusTaskOptions.some((task) => task.id === taskId)) setSelectedFocusTaskId(taskId);
+  }
+
+  function toggleTimer() {
+    if (timerRunning) {
+      setTimerRunning(false);
+      return;
+    }
+    completionHandledRef.current = false;
+    if (timerMode === "focus" && !activeFocusContext) {
+      const task = focusTaskOptions.find((item) => item.id === selectedFocusTaskId);
+      setActiveFocusContext({
+        taskId: task?.id ?? null,
+        taskTitle: task?.title ?? "",
+        startedAt: new Date().toISOString(),
+      });
+    }
+    setTimerRunning(true);
   }
 
   return {
@@ -310,8 +372,14 @@ export function useDeskFlow() {
     setMode,
     secondsLeft,
     timerRunning,
-    setTimerRunning,
+    toggleTimer,
     resetTimer,
+    focusTaskOptions,
+    selectedFocusTaskId,
+    selectFocusTask,
+    focusSelectionLocked: activeFocusContext !== null,
+    activeFocusTaskId: activeFocusContext?.taskId ?? null,
+    activeFocusTaskTitle: activeFocusContext?.taskTitle ?? "",
     sidebarCollapsed,
     setSidebarCollapsed,
     visibleTasks,
