@@ -26,6 +26,7 @@ src/
 ├── features/
 │   ├── tasks/
 │   ├── focus/
+│   ├── review/
 │   └── reader/
 ├── hooks/useDeskFlow.ts
 ├── lib/state.ts
@@ -40,6 +41,7 @@ tests/
 ├── feeds.cjs
 ├── focus-sessions.mjs
 ├── focus-timer.mjs
+├── daily-records.mjs
 ├── state-migration.cjs
 ├── state-store.cjs
 ├── task-dates.mjs
@@ -62,6 +64,7 @@ tests/
 - `src/components/`：跨功能或应用外壳组件。当前只有侧栏符合这个边界。
 - `src/features/tasks/`：任务列表、日历和任务编辑相关组件。
 - `src/features/focus/`：专注计时相关组件。
+- `src/features/review/`：每日回顾页面和按本地日期派生记录概览的逻辑。
 - `src/features/reader/`：订阅阅读界面以及订阅发现、解析和分页逻辑。
 - `src/hooks/useDeskFlow.ts`：当前应用状态与主要操作入口。保持现状，只有出现可独立测试且职责清晰的领域逻辑时再逐步拆分。
 - `src/lib/state.ts`：跨功能的状态默认值、归一化和迁移。
@@ -77,6 +80,7 @@ tests/
 - `tests/feeds.cjs`：订阅发现、解析、分页和合并回归测试。
 - `tests/focus-sessions.mjs`：专注记录创建、实际投入和补充文字更新测试。
 - `tests/focus-timer.mjs`：专注计时的时间戳推进、暂停恢复、持久化归一化和完成边界测试。
+- `tests/daily-records.mjs`：回顾日期边界和任务、专注、回顾记录概览测试。
 - `tests/state-migration.cjs`：存档版本迁移、活动计时恢复和异常值过滤测试。
 - `tests/state-store.cjs`：主进程存档读取、备份恢复和写入测试。
 - `tests/task-dates.mjs`：任务创建日下限和异常日期的业务规则测试。

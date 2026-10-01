@@ -10,6 +10,7 @@ import { WindowControls } from "./components/WindowControls";
 import { TaskSection } from "./features/tasks/TaskSection";
 import { TaskEditorModal } from "./features/tasks/TaskEditorModal";
 import { FocusReader } from "./features/reader/FocusReader";
+import { ReviewPage } from "./features/review/ReviewPage";
 import { formatDateLabel, getDateKey } from "./types";
 import type { Task, TaskInput } from "./types";
 import { useDeskFlow } from "./hooks/useDeskFlow";
@@ -156,6 +157,8 @@ export function App() {
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
             </aside>
           </div>
+        ) : activeSection === "review" ? (
+          <ReviewPage tasks={state.tasks} focusSessions={state.focusSessions} dailyReflections={state.dailyReflections} onGoToTasks={() => setActiveSection("tasks")} />
         ) : (
           <FocusReader feeds={state.feeds} groups={state.groups} articles={state.articles} feedsBusy={deskFlow.feedsBusy} subscribing={deskFlow.subscribing} onSubscribe={deskFlow.subscribeFeed} onRefresh={deskFlow.refreshFeeds} onRemoveFeed={deskFlow.removeFeed} onUpdateArticle={deskFlow.updateArticle} onAddGroup={deskFlow.addFeedGroup} onRenameGroup={deskFlow.renameFeedGroup} onRemoveGroup={deskFlow.removeFeedGroup} onSetFeedGroup={deskFlow.setFeedGroup} />
         )}
