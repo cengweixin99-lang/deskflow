@@ -8,6 +8,7 @@ export type ReflectionScore = 1 | 2 | 3 | 4 | 5;
 export interface Task {
   id: string;
   title: string;
+  createdAt: string;
   completed: boolean;
   priority: TaskPriority;
   date: string;

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
 import { createFocusSession, updateFocusSessionNote } from "../features/focus/sessions";
 import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerCompletionTime, getTimerDurationSeconds, getTimerProgress, pauseTimerProgress } from "../features/focus/timer";
+import { canScheduleTaskOn } from "../features/tasks/taskDates";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
 import type { ActiveTimerState, AppState, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
@@ -157,6 +158,7 @@ export function useDeskFlow() {
     const task: Task = {
       id: crypto.randomUUID(),
       title,
+      createdAt: new Date().toISOString(),
       completed: false,
       priority: input.priority,
       date: input.date,
@@ -191,7 +193,7 @@ export function useDeskFlow() {
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((task) =>
-        task.id === id ? {
+        task.id === id && canScheduleTaskOn(task, input.date) ? {
           ...task,
           title,
           priority: input.priority,

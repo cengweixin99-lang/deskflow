@@ -6,6 +6,7 @@ import type { FocusSession, Task, TaskInput, TaskPriority } from "../../types";
 import { useWindowModalState } from "../../hooks/useWindowModalState";
 import { DatePicker } from "./DatePicker";
 import { TaskFocusHistory } from "./TaskFocusHistory";
+import { getTaskEarliestDate } from "./taskDates";
 
 interface TaskEditorModalProps {
   mode: "create" | "edit";
@@ -89,6 +90,7 @@ export function TaskEditorModal({ mode, task, focusSessions = [], initialDate = 
         ? `保存后，这项任务会移出“今天”列表，安排到${formatDateLabel(date)}。`
         : `保存后，这项任务会改期到${formatDateLabel(date)}。`
     : "";
+  const earliestDate = mode === "edit" && task ? getTaskEarliestDate(task) : getDateKey();
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
@@ -115,7 +117,8 @@ export function TaskEditorModal({ mode, task, focusSessions = [], initialDate = 
             </fieldset>
             <div className="task-editor-field task-editor-date">
               <span id="task-editor-date-label"><CalendarDays size={13} />日期</span>
-              <DatePicker value={date} min={mode === "create" ? getDateKey() : undefined} labelId="task-editor-date-label" describedBy={error ? "task-editor-error" : undefined} invalid={error === "请选择任务日期"} onChange={(nextDate) => { setDate(nextDate); setError(""); }} />
+              <DatePicker value={date} min={earliestDate} labelId="task-editor-date-label" describedBy={error ? "task-editor-error" : "task-editor-date-limit"} invalid={error === "请选择任务日期"} onChange={(nextDate) => { setDate(nextDate); setError(""); }} />
+              {mode === "edit" && <small className="task-editor-date-limit" id="task-editor-date-limit">最早可安排到创建日：{formatDateLabel(earliestDate)}</small>}
             </div>
           </div>
           {dateChangeMessage && <div className="task-date-change-notice"><CalendarClock size={15} /><span>{dateChangeMessage}</span></div>}

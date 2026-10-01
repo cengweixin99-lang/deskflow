@@ -42,6 +42,7 @@ tests/
 ├── focus-timer.mjs
 ├── state-migration.cjs
 ├── state-store.cjs
+├── task-dates.mjs
 └── task-focus-history.mjs
 ```
 
@@ -78,6 +79,7 @@ tests/
 - `tests/focus-timer.mjs`：专注计时的时间戳推进、暂停恢复、持久化归一化和完成边界测试。
 - `tests/state-migration.cjs`：存档版本迁移、活动计时恢复和异常值过滤测试。
 - `tests/state-store.cjs`：主进程存档读取、备份恢复和写入测试。
+- `tests/task-dates.mjs`：任务创建日下限和异常日期的业务规则测试。
 - `tests/task-focus-history.mjs`：任务关联专注记录的筛选、累计与时间排序测试。
 
 测试规模尚不需要镜像源码目录。新增测试时优先按被测模块命名；只有单一领域出现多个测试文件后，再为该领域建立子目录。

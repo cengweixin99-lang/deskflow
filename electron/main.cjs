@@ -14,7 +14,7 @@ const { fetchText } = require('./network.cjs')
 const { isStatePayload, readStateFile, writeStateFile } = require('./state-store.cjs')
 
 const isDev = !app.isPackaged
-const CURRENT_SCHEMA_VERSION = 2
+const CURRENT_SCHEMA_VERSION = 3
 
 const modalWindows = new WeakSet()
 let quitting = false
@@ -38,9 +38,9 @@ const todayKey = () => {
 const defaultState = {
   schemaVersion: CURRENT_SCHEMA_VERSION,
   tasks: [
-    { id: 'welcome', title: '把今天最重要的一件事写下来', completed: false, priority: 'high', date: todayKey(), notes: '' },
-    { id: 'deep-work', title: '完成 90 分钟不被打扰的深度工作', completed: false, priority: 'medium', date: todayKey(), notes: '' },
-    { id: 'review', title: '整理收件箱，留下真正需要行动的事项', completed: true, priority: 'low', date: todayKey(), notes: '' },
+    { id: 'welcome', title: '把今天最重要的一件事写下来', createdAt: new Date().toISOString(), completed: false, priority: 'high', date: todayKey(), notes: '' },
+    { id: 'deep-work', title: '完成 90 分钟不被打扰的深度工作', createdAt: new Date().toISOString(), completed: false, priority: 'medium', date: todayKey(), notes: '' },
+    { id: 'review', title: '整理收件箱，留下真正需要行动的事项', createdAt: new Date().toISOString(), completed: true, priority: 'low', date: todayKey(), notes: '' },
   ],
   focusMinutes: 0,
   feeds: [],
