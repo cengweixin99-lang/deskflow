@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
+import { createFocusSession, updateFocusSessionNote } from "../features/focus/sessions";
 import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerCompletionTime, getTimerDurationSeconds, getTimerProgress, pauseTimerProgress } from "../features/focus/timer";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
@@ -14,6 +15,7 @@ export function useDeskFlow() {
   const [timerRunning, setTimerRunning] = useState(false);
   const [selectedFocusTaskId, setSelectedFocusTaskId] = useState("");
   const [timerRestored, setTimerRestored] = useState(false);
+  const [focusCompletion, setFocusCompletion] = useState<FocusSession | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedsBusy, setFeedsBusy] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
@@ -78,22 +80,20 @@ export function useDeskFlow() {
     const completionTime = getTimerCompletionTime(getTimerDurationSeconds(completedMode), getTimerProgress(activeTimerContext));
     const endedAt = new Date(completionTime ?? Date.now()).toISOString();
     if (activeTimerContext.mode === "focus") {
-      const session: FocusSession = {
+      const session = createFocusSession({
         id: crypto.randomUUID(),
-        taskId: activeTimerContext.taskId,
-        taskTitle: activeTimerContext.taskTitle,
-        startedAt: activeTimerContext.startedAt,
+        timer: activeTimerContext,
         endedAt,
         durationSeconds: FOCUS_DURATION_SECONDS,
         status: "completed",
-        note: "",
-      };
+      });
       setState((currentState) => ({
         ...currentState,
         focusMinutes: currentState.focusMinutes + 25,
         focusSessions: [session, ...currentState.focusSessions],
         activeTimer: null,
       }));
+      setFocusCompletion(session);
     } else {
       setState((currentState) => ({ ...currentState, activeTimer: null }));
     }
@@ -410,22 +410,20 @@ export function useDeskFlow() {
       getElapsedSeconds(getTimerProgress(activeTimerContext), Date.now()),
     );
     if (stoppedMode === "focus") {
-      const session: FocusSession = {
+      const session = createFocusSession({
         id: crypto.randomUUID(),
-        taskId: activeTimerContext.taskId,
-        taskTitle: activeTimerContext.taskTitle,
-        startedAt: activeTimerContext.startedAt,
+        timer: activeTimerContext,
         endedAt: new Date().toISOString(),
         durationSeconds,
         status: "stopped",
-        note: "",
-      };
+      });
       setState((currentState) => ({
         ...currentState,
         focusMinutes: currentState.focusMinutes + durationSeconds / 60,
         focusSessions: [session, ...currentState.focusSessions],
         activeTimer: null,
       }));
+      setFocusCompletion(session);
       window.desktop.showNotification({
         title: "本次专注已记录",
         body: activeTimerContext.taskTitle ? `已为“${activeTimerContext.taskTitle}”记录 ${formatTimerDuration(durationSeconds)}。` : `已记录 ${formatTimerDuration(durationSeconds)}。`,
@@ -439,6 +437,18 @@ export function useDeskFlow() {
     const nextMode = stoppedMode === "break" ? "focus" : stoppedMode;
     setTimerMode(nextMode);
     setSecondsLeft(getTimerDurationSeconds(nextMode));
+  }
+
+  function saveFocusCompletionNote(sessionId: string, note: string) {
+    setState((currentState) => ({
+      ...currentState,
+      focusSessions: updateFocusSessionNote(currentState.focusSessions, sessionId, note),
+    }));
+    setFocusCompletion((currentSession) => currentSession?.id === sessionId ? null : currentSession);
+  }
+
+  function dismissFocusCompletion() {
+    setFocusCompletion(null);
   }
 
   return {
@@ -458,6 +468,9 @@ export function useDeskFlow() {
     selectFocusTask,
     timerSessionActive: activeTimerContext !== null,
     timerRestored,
+    focusCompletion,
+    saveFocusCompletionNote,
+    dismissFocusCompletion,
     elapsedTimerSeconds: activeTimerContext ? getTimerDurationSeconds(activeTimerContext.mode) - secondsLeft : 0,
     focusSelectionLocked: activeTimerContext?.mode === "focus",
     activeFocusTaskId: activeTimerContext?.mode === "focus" ? activeTimerContext.taskId : null,
