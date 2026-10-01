@@ -10,8 +10,10 @@
     "start": "electron .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "test": "npm run test:state && npm run test:feeds",
     "test:feeds": "node tests/feeds.cjs",
-    "test:state": "node --test tests/state-store.cjs"
+    "test:state": "node --test tests/state-store.cjs",
+    "check": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

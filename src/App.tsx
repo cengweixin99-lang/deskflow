@@ -1,12 +1,12 @@
 import { CalendarCheck2, RotateCcw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import "./App.css";
-import { FocusCard } from "./components/FocusCard";
-import { CalendarCard } from "./components/CalendarCard";
+import { FocusCard } from "./features/focus/FocusCard";
+import { CalendarCard } from "./features/tasks/CalendarCard";
 import { Sidebar, type AppSection } from "./components/Sidebar";
-import { TaskSection } from "./components/TaskSection";
-import { TaskEditorModal } from "./components/TaskEditorModal";
-import { FocusReader } from "./components/FocusReader";
+import { TaskSection } from "./features/tasks/TaskSection";
+import { TaskEditorModal } from "./features/tasks/TaskEditorModal";
+import { FocusReader } from "./features/reader/FocusReader";
 import { formatDateLabel, getDateKey } from "./types";
 import type { Task, TaskInput } from "./types";
 import { useDeskFlow } from "./hooks/useDeskFlow";

@@ -1,7 +1,7 @@
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import { useEffect } from "react";
 import "./DeleteConfirmModal.css";
-import type { Task } from "../types";
+import type { Task } from "../../types";
 
 interface DeleteConfirmModalProps {
   task: Task;

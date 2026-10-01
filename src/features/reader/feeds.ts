@@ -1,4 +1,4 @@
-import type { FeedArticle, FeedSource, FetchedText } from "../types";
+import type { FeedArticle, FeedSource, FetchedText } from "../../types";
 
 export interface DiscoveredFeed {
   title: string;

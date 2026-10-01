@@ -1,8 +1,8 @@
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Circle } from "lucide-react";
 import { useMemo, useState } from "react";
 import "./CalendarCard.css";
-import { getDateKey } from "../types";
-import type { Task } from "../types";
+import { getDateKey } from "../../types";
+import type { Task } from "../../types";
 
 const weekLabels = ["一", "二", "三", "四", "五", "六", "日"];
 
