@@ -1,4 +1,4 @@
-import type { DailyReflection, FocusSession, Task } from "../../types";
+import type { DailyReflection, FocusSession, ReadingAction, Task } from "../../types";
 
 function getLocalDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -34,22 +34,26 @@ export function getDailyRecordOverview({
   date,
   tasks,
   focusSessions,
+  readingActions,
   dailyReflections,
 }: {
   date: string;
   tasks: Task[];
   focusSessions: FocusSession[];
+  readingActions: ReadingAction[];
   dailyReflections: DailyReflection[];
 }) {
   const dailyTasks = tasks.filter((task) => task.date === date);
   const focusSessionCount = focusSessions.filter((session) => getTimestampDateKey(session.startedAt) === date).length;
+  const readingActionCount = readingActions.filter((action) => getTimestampDateKey(action.openedAt) === date).length;
   const hasReflection = dailyReflections.some((reflection) => reflection.date === date);
 
   return {
     taskCount: dailyTasks.length,
     completedTaskCount: dailyTasks.filter((task) => task.completed).length,
     focusSessionCount,
+    readingActionCount,
     hasReflection,
-    hasRecords: dailyTasks.length > 0 || focusSessionCount > 0 || hasReflection,
+    hasRecords: dailyTasks.length > 0 || focusSessionCount > 0 || readingActionCount > 0 || hasReflection,
   };
 }

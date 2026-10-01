@@ -40,6 +40,7 @@ interface FocusReaderProps {
   onRefresh: (feedId?: string) => Promise<void>;
   onRemoveFeed: (id: string) => void;
   onUpdateArticle: (id: string, patch: Partial<Pick<FeedArticle, "read" | "saved">>) => void;
+  onOpenArticle: (id: string) => void;
   onAddGroup: (name: string) => string;
   onRenameGroup: (id: string, name: string) => void;
   onRemoveGroup: (id: string) => void;
@@ -88,6 +89,7 @@ export function FocusReader({
   onRefresh,
   onRemoveFeed,
   onUpdateArticle,
+  onOpenArticle,
   onAddGroup,
   onRenameGroup,
   onRemoveGroup,
@@ -232,11 +234,13 @@ export function FocusReader({
     try {
       await window.desktop.openBrowser(url);
       if (requestId === browserRequestRef.current) setBrowserLoading(false);
+      return true;
     } catch (error) {
-      if (requestId !== browserRequestRef.current) return;
+      if (requestId !== browserRequestRef.current) return false;
       setBrowserOpen(false);
       setBrowserLoading(false);
       setBrowserError(error instanceof Error ? error.message : "网页打开失败");
+      return false;
     }
   }
 
@@ -257,8 +261,7 @@ export function FocusReader({
   async function openArticle(article: FeedArticle, context?: { type: "feed" | "filter"; id: string }) {
     setSelectedArticleId(article.id);
     if (context) setSelectedArticleContext(context);
-    onUpdateArticle(article.id, { read: true });
-    await loadBrowserUrl(article.link);
+    if (await loadBrowserUrl(article.link)) onOpenArticle(article.id);
   }
 
   function closeBrowser() {

@@ -1,13 +1,16 @@
-import { CalendarDays, ChevronLeft, ChevronRight, ClipboardList, Clock3, NotebookText, RotateCcw } from "lucide-react";
+import { BookOpenText, CalendarDays, ChevronLeft, ChevronRight, ClipboardList, Clock3, NotebookText, RotateCcw } from "lucide-react";
 import { useMemo, useState } from "react";
-import type { DailyReflection, FocusSession, Task } from "../../types";
+import type { DailyReflection, FocusSession, ReadingAction, Task } from "../../types";
 import { getDateKey } from "../../types";
+import { DailyTimeline } from "./DailyTimeline";
 import { getDailyRecordOverview, isReviewDateAllowed, shiftReviewDate } from "./dailyRecords";
+import { getDailyTimelineItems } from "./timeline";
 import "./ReviewPage.css";
 
 interface ReviewPageProps {
   tasks: Task[];
   focusSessions: FocusSession[];
+  readingActions: ReadingAction[];
   dailyReflections: DailyReflection[];
   onGoToTasks: () => void;
 }
@@ -21,7 +24,7 @@ function formatReviewDate(dateKey: string) {
   }).format(new Date(`${dateKey}T12:00:00`));
 }
 
-export function ReviewPage({ tasks, focusSessions, dailyReflections, onGoToTasks }: ReviewPageProps) {
+export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflections, onGoToTasks }: ReviewPageProps) {
   const today = getDateKey();
   const [selectedDate, setSelectedDate] = useState(today);
   const isToday = selectedDate === today;
@@ -29,8 +32,15 @@ export function ReviewPage({ tasks, focusSessions, dailyReflections, onGoToTasks
     date: selectedDate,
     tasks,
     focusSessions,
+    readingActions,
     dailyReflections,
-  }), [dailyReflections, focusSessions, selectedDate, tasks]);
+  }), [dailyReflections, focusSessions, readingActions, selectedDate, tasks]);
+  const timelineItems = useMemo(() => getDailyTimelineItems({
+    date: selectedDate,
+    tasks,
+    focusSessions,
+    readingActions,
+  }), [focusSessions, readingActions, selectedDate, tasks]);
 
   function selectDate(date: string) {
     if (!isReviewDateAllowed(date, today)) return false;
@@ -84,13 +94,20 @@ export function ReviewPage({ tasks, focusSessions, dailyReflections, onGoToTasks
           <span className="review-overview-copy"><small>专注记录</small><strong>{overview.focusSessionCount} 段</strong><span>按开始时间归入当天</span></span>
         </article>
         <article className="review-overview-card">
+          <span className="review-overview-icon reading"><BookOpenText size={18} /></span>
+          <span className="review-overview-copy"><small>阅读行动</small><strong>{overview.readingActionCount} 次</strong><span>成功打开文章的记录</span></span>
+        </article>
+        <article className="review-overview-card">
           <span className="review-overview-icon reflection"><NotebookText size={18} /></span>
           <span className="review-overview-copy"><small>每日回顾</small><strong>{overview.hasReflection ? "已保存" : "未填写"}</strong><span>本机每日回顾记录</span></span>
         </article>
       </div>
 
       {overview.hasRecords ? (
-        <p className="review-fact-note">这里只呈现已经保存在本机的事实，不会把记录数量换算成单一效率评分。</p>
+        <>
+          <p className="review-fact-note">这里只呈现已经保存在本机的事实，不会把记录数量换算成单一效率评分。</p>
+          <DailyTimeline items={timelineItems} />
+        </>
       ) : (
         <div className="review-empty-state">
           <CalendarDays size={28} />

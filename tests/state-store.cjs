@@ -6,12 +6,13 @@ const test = require('node:test')
 const { isStatePayload, readStateFile, writeStateFile } = require('../electron/state-store.cjs')
 
 const validState = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   tasks: [],
   focusMinutes: 0,
   feeds: [],
   groups: [],
   articles: [],
+  readingActions: [],
   focusSessions: [],
   activeTimer: null,
   dailyReflections: [],
@@ -47,11 +48,12 @@ test('atomic writes retain the previous valid state as a backup', async (t) => {
 })
 
 test('IPC state validation requires the current top-level schema', () => {
-  assert.equal(isStatePayload(validState, 3), true)
-  assert.equal(isStatePayload({ ...validState, schemaVersion: 2 }, 3), false)
-  assert.equal(isStatePayload({ ...validState, focusSessions: null }, 3), false)
-  assert.equal(isStatePayload({ ...validState, focusMinutes: -1 }, 3), false)
-  assert.equal(isStatePayload({ ...validState, activeTimer: {} }, 3), false)
+  assert.equal(isStatePayload(validState, 4), true)
+  assert.equal(isStatePayload({ ...validState, schemaVersion: 3 }, 4), false)
+  assert.equal(isStatePayload({ ...validState, readingActions: null }, 4), false)
+  assert.equal(isStatePayload({ ...validState, focusSessions: null }, 4), false)
+  assert.equal(isStatePayload({ ...validState, focusMinutes: -1 }, 4), false)
+  assert.equal(isStatePayload({ ...validState, activeTimer: {} }, 4), false)
   assert.equal(isStatePayload({
     ...validState,
     activeTimer: {
@@ -62,5 +64,5 @@ test('IPC state validation requires the current top-level schema', () => {
       elapsedMilliseconds: 12_000,
       runningSince: null,
     },
-  }, 3), true)
+  }, 4), true)
 })

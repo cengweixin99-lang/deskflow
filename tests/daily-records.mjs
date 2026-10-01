@@ -15,6 +15,7 @@ test("daily overview derives task, focus, and reflection facts for the selected 
       { id: "focus-1", taskId: "task-1", taskTitle: "完成页面", startedAt: octoberFirstMorning, endedAt: new Date(2026, 9, 1, 10).toISOString(), durationSeconds: 1800, status: "completed", note: "" },
       { id: "focus-2", taskId: null, taskTitle: "", startedAt: septemberThirtiethEvening, endedAt: new Date(2026, 9, 1, 0, 10).toISOString(), durationSeconds: 1200, status: "stopped", note: "" },
     ],
+    readingActions: [{ id: "read-1", articleId: "article-1", articleTitle: "回顾文章", articleLink: "https://example.com", feedId: "feed-1", feedTitle: "示例来源", openedAt: octoberFirstMorning }],
     dailyReflections: [{ date: "2026-10-01", summary: "推进顺利", energy: 4, satisfaction: 4, updatedAt: octoberFirstMorning }],
   });
 
@@ -22,6 +23,7 @@ test("daily overview derives task, focus, and reflection facts for the selected 
     taskCount: 1,
     completedTaskCount: 1,
     focusSessionCount: 1,
+    readingActionCount: 1,
     hasReflection: true,
     hasRecords: true,
   });
@@ -32,12 +34,14 @@ test("empty dates stay factual and do not borrow records from another day", () =
     date: "2026-10-01",
     tasks: [],
     focusSessions: [],
+    readingActions: [],
     dailyReflections: [],
   });
 
   assert.equal(overview.hasRecords, false);
   assert.equal(overview.taskCount, 0);
   assert.equal(overview.focusSessionCount, 0);
+  assert.equal(overview.readingActionCount, 0);
   assert.equal(overview.hasReflection, false);
 });
 
