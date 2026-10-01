@@ -1,15 +1,18 @@
-import { CalendarClock, CalendarDays, Check, CheckCircle2, Circle, Flag, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, CalendarDays, Check, CheckCircle2, Circle, Clock3, Flag, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { PostponeTaskModal } from "./PostponeTaskModal";
+import { formatTimerDuration } from "../focus/timer";
 import { formatDateLabel, getDateKey } from "../../types";
-import type { Task, TaskView } from "../../types";
+import type { FocusSession, Task, TaskView } from "../../types";
+import { getTaskFocusSummary } from "./focusHistory";
 
 interface TaskSectionProps {
   view: TaskView;
   viewCounts: Record<TaskView, number>;
   visibleTasks: Task[];
+  focusSessions: FocusSession[];
   progress: number;
   onViewChange: (view: TaskView) => void;
   onCreateTask: (initialDate: string) => void;
@@ -66,6 +69,7 @@ export function TaskSection({
   view,
   viewCounts,
   visibleTasks,
+  focusSessions,
   progress,
   onViewChange,
   onCreateTask,
@@ -150,7 +154,7 @@ export function TaskSection({
       ) : view === "today" ? (
         <div className="task-list">
           {visibleTasks.map((task) => (
-            <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
+            <TaskItem key={task.id} task={task} focusSessions={focusSessions} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
           ))}
         </div>
       ) : (
@@ -163,7 +167,7 @@ export function TaskSection({
               </div>
               <div className="task-list">
                 {group.tasks.map((task) => (
-                  <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
+                  <TaskItem key={task.id} task={task} focusSessions={focusSessions} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
                 ))}
               </div>
             </section>
@@ -193,17 +197,21 @@ export function TaskSection({
 
 function TaskItem({
   task,
+  focusSessions,
   onToggle,
   onDelete,
   onEdit,
   onPostpone,
 }: {
   task: Task;
+  focusSessions: FocusSession[];
   onToggle: (task: Task) => void;
   onDelete: (task: Task) => void;
   onEdit: (task: Task) => void;
   onPostpone: (task: Task) => void;
 }) {
+  const focusSummary = getTaskFocusSummary(focusSessions, task.id);
+
   return (
     <article className={task.completed ? "task-item completed" : "task-item"}>
       <button
@@ -216,9 +224,14 @@ function TaskItem({
       </button>
       <div className="task-body">
         <div className="task-title-row">
-          <button className="task-title-button" type="button" onClick={() => onEdit(task)} title="编辑任务">{task.title}</button>
+          <button className="task-title-button" type="button" onClick={() => onEdit(task)} title="查看任务详情">{task.title}</button>
           <span className={`priority-line ${task.priority}`} />
         </div>
+        {focusSummary.sessions.length > 0 && (
+          <span className="task-focus-summary" aria-label={`累计专注 ${formatTimerDuration(focusSummary.totalDurationSeconds)}，共 ${focusSummary.sessions.length} 次记录`}>
+            <Clock3 size={11} />{formatTimerDuration(focusSummary.totalDurationSeconds)}<i />{focusSummary.sessions.length} 次
+          </span>
+        )}
       </div>
       <div className="task-actions">
         {!task.completed && <button className="task-action-button postpone-button" type="button" onClick={() => onPostpone(task)} aria-label={`推迟“${task.title}”`} title="推迟任务"><CalendarClock size={15} /></button>}

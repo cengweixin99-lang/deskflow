@@ -39,6 +39,7 @@ test("duration labels stay concise", () => {
   assert.equal(formatTimerDuration(0), "0 秒");
   assert.equal(formatTimerDuration(60), "1 分钟");
   assert.equal(formatTimerDuration(65), "1 分 5 秒");
+  assert.equal(formatTimerDuration(13_820), "3 小时 50 分 20 秒");
 });
 
 test("persisted timers are normalized without losing task snapshots", () => {

@@ -60,8 +60,10 @@ export function resumeTimerProgress(progress: TimerProgress, now: number): Timer
 
 export function formatTimerDuration(durationSeconds: number) {
   const safeSeconds = Math.max(0, Math.floor(durationSeconds));
-  const minutes = Math.floor(safeSeconds / 60);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
   const seconds = safeSeconds % 60;
+  if (hours) return [`${hours} 小时`, minutes ? `${minutes} 分` : "", seconds ? `${seconds} 秒` : ""].filter(Boolean).join(" ");
   if (!minutes) return `${seconds} 秒`;
   if (!seconds) return `${minutes} 分钟`;
   return `${minutes} 分 ${seconds} 秒`;
