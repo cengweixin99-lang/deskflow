@@ -14,6 +14,8 @@ export interface Task {
   notes: string;
 }
 
+export type TaskInput = Pick<Task, "title" | "priority" | "date" | "notes">;
+
 export interface FeedSource {
   id: string;
   title: string;

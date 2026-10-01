@@ -1,22 +1,25 @@
-import { Check, CheckCircle2, Circle, FileText, ListFilter, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, Check, CheckCircle2, Circle, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { getDateKey } from "../types";
 import type { Task, TaskFilter, TaskPriority } from "../types";
 
 interface TaskSectionProps {
   filter: TaskFilter;
   visibleTasks: Task[];
   draft: string;
+  draftDate: string;
   priority: TaskPriority;
   progress: number;
   onFilterChange: (filter: TaskFilter) => void;
   onDraftChange: (value: string) => void;
+  onDraftDateChange: (value: string) => void;
   onPriorityChange: (priority: TaskPriority) => void;
   onAddTask: (event: FormEvent<HTMLFormElement>) => void;
   onToggleTask: (id: string) => void;
   onDeleteTask: (id: string) => void;
-  onOpenNotes: (task: Task) => void;
+  onEditTask: (task: Task) => void;
 }
 
 const todayLabel = new Intl.DateTimeFormat("zh-CN", {
@@ -29,15 +32,17 @@ export function TaskSection({
   filter,
   visibleTasks,
   draft,
+  draftDate,
   priority,
   progress,
   onFilterChange,
   onDraftChange,
+  onDraftDateChange,
   onPriorityChange,
   onAddTask,
   onToggleTask,
   onDeleteTask,
-  onOpenNotes,
+  onEditTask,
 }: TaskSectionProps) {
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Task | null>(null);
@@ -65,7 +70,7 @@ export function TaskSection({
         </div>
       </div>
 
-      <form className="quick-add" onSubmit={onAddTask}>
+      <form className="quick-add" id="quick-add-task" onSubmit={onAddTask}>
         <Plus size={20} />
         <input
           value={draft}
@@ -92,6 +97,7 @@ export function TaskSection({
             {item === "high" ? "高" : item === "medium" ? "中" : "低"}
           </button>
         ))}
+        <label className="quick-date"><CalendarDays size={12} /><span>日期</span><input form="quick-add-task" type="date" value={draftDate} min={getDateKey()} onChange={(event) => onDraftDateChange(event.target.value)} required /></label>
       </div>
 
       <div className="list-header">
@@ -117,7 +123,7 @@ export function TaskSection({
               task={task}
               onToggle={onToggleTask}
               onDelete={setPendingDelete}
-              onOpenNotes={onOpenNotes}
+              onEdit={onEditTask}
             />
           ))
         )}
@@ -140,16 +146,17 @@ function TaskItem({
   task,
   onToggle,
   onDelete,
-  onOpenNotes,
+  onEdit,
 }: {
   task: Task;
   onToggle: (id: string) => void;
   onDelete: (task: Task) => void;
-  onOpenNotes: (task: Task) => void;
+  onEdit: (task: Task) => void;
 }) {
   return (
     <article className={task.completed ? "task-item completed" : "task-item"}>
       <button
+        type="button"
         className="check-button"
         onClick={() => onToggle(task.id)}
         aria-label={task.completed ? "标记为未完成" : "完成事项"}
@@ -158,12 +165,12 @@ function TaskItem({
       </button>
       <div className="task-body">
         <div className="task-title-row">
-          <h3>{task.title}</h3>
+          <button className="task-title-button" type="button" onClick={() => onEdit(task)} title="编辑任务">{task.title}</button>
           <span className={`priority-line ${task.priority}`} />
         </div>
       </div>
-      <button className="notes-button" onClick={() => onOpenNotes(task)} aria-label={task.notes ? "查看记录" : "添加记录"} title={task.notes ? "查看记录" : "添加记录"}>
-        <FileText size={15} />
+      <button className="edit-button" type="button" onClick={() => onEdit(task)} aria-label="编辑任务" title="编辑任务">
+        <Pencil size={15} />
       </button>
       <button
         type="button"
