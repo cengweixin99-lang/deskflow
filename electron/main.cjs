@@ -16,6 +16,20 @@ const { isStatePayload, readStateFile, writeStateFile } = require('./state-store
 const isDev = !app.isPackaged
 const CURRENT_SCHEMA_VERSION = 1
 
+const modalWindows = new WeakSet()
+let quitting = false
+
+function setWindowModalActive(win, active) {
+  if (!win || win.isDestroyed()) return
+  if (active) modalWindows.add(win)
+  else modalWindows.delete(win)
+}
+
+function sendWindowMaximizedState(win) {
+  if (!win || win.isDestroyed() || win.webContents.isDestroyed()) return
+  win.webContents.send('window:maximized-state', win.isMaximized())
+}
+
 const todayKey = () => {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -61,12 +75,7 @@ function createWindow() {
     minWidth: 960,
     minHeight: 680,
     backgroundColor: '#f7f6f2',
-    titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#f7f6f2',
-      symbolColor: '#77766f',
-      height: 36,
-    },
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -76,7 +85,14 @@ function createWindow() {
 
   win.maximize()
   win.once('ready-to-show', () => win.show())
+  win.on('close', (event) => {
+    if (!quitting && modalWindows.has(win)) event.preventDefault()
+  })
+  win.on('maximize', () => sendWindowMaximizedState(win))
+  win.on('unmaximize', () => sendWindowMaximizedState(win))
   win.on('closed', () => destroyBrowserView(win, true))
+  win.webContents.on('did-start-loading', () => setWindowModalActive(win, false))
+  win.webContents.on('render-process-gone', () => setWindowModalActive(win, false))
 
   if (isDev) {
     win.loadURL('http://127.0.0.1:5173')
@@ -99,6 +115,28 @@ app.whenReady().then(() => {
   ipcMain.on('browser:back', (event) => goBack(event.sender))
   ipcMain.on('browser:forward', (event) => goForward(event.sender))
   ipcMain.on('browser:reload', (event) => reloadBrowser(event.sender))
+  ipcMain.on('window:set-modal-active', (event, active) => {
+    if (typeof active !== 'boolean') return
+    setWindowModalActive(BrowserWindow.fromWebContents(event.sender), active)
+  })
+  ipcMain.handle('window:is-maximized', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    return win?.isMaximized() ?? false
+  })
+  ipcMain.on('window:minimize', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win && !modalWindows.has(win)) win.minimize()
+  })
+  ipcMain.on('window:toggle-maximize', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win || modalWindows.has(win)) return
+    if (win.isMaximized()) win.unmaximize()
+    else win.maximize()
+  })
+  ipcMain.on('window:close', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win && !modalWindows.has(win)) win.close()
+  })
   // on(单向)，触发系统通知
   ipcMain.on('notification:show', (_event, { title, body }) => {
     if (Notification.isSupported()) new Notification({ title, body }).show()
@@ -108,6 +146,10 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  quitting = true
 })
 
 app.on('window-all-closed', () => {

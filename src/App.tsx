@@ -4,15 +4,18 @@ import "./App.css";
 import { FocusCard } from "./features/focus/FocusCard";
 import { CalendarCard } from "./features/tasks/CalendarCard";
 import { Sidebar, type AppSection } from "./components/Sidebar";
+import { WindowControls } from "./components/WindowControls";
 import { TaskSection } from "./features/tasks/TaskSection";
 import { TaskEditorModal } from "./features/tasks/TaskEditorModal";
 import { FocusReader } from "./features/reader/FocusReader";
 import { formatDateLabel, getDateKey } from "./types";
 import type { Task, TaskInput } from "./types";
 import { useDeskFlow } from "./hooks/useDeskFlow";
+import { useWindowModalActive } from "./hooks/useWindowModalState";
 
 export function App() {
   const deskFlow = useDeskFlow();
+  const windowModalActive = useWindowModalActive();
   const { state, taskView, visibleTasks, sidebarCollapsed } = deskFlow;
   const [taskEditor, setTaskEditor] = useState<{ mode: "create"; initialDate: string } | { mode: "edit"; task: Task } | null>(null);
   const [taskNotice, setTaskNotice] = useState<{
@@ -73,6 +76,15 @@ export function App() {
     });
   }
 
+  function postponeTask(task: Task, date: string) {
+    updateTask(task, {
+      title: task.title,
+      priority: task.priority,
+      date,
+      notes: task.notes,
+    });
+  }
+
   const taskNoticeTitle = taskNotice
     ? {
         created: "任务已安排",
@@ -96,11 +108,12 @@ export function App() {
   return (
     <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}${activeSection === "focus" ? " focus-shell" : ""}`}>
       <div className="window-drag-region" aria-hidden="true" />
+      <WindowControls disabled={windowModalActive} />
       <Sidebar collapsed={sidebarCollapsed} activeSection={activeSection} onSelect={setActiveSection} onToggle={() => deskFlow.setSidebarCollapsed((collapsed) => !collapsed)} />
       <main className="main-content">
         {activeSection === "tasks" ? (
           <div className="content-grid">
-            <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} />
+            <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
             <aside className="right-column">
               <FocusCard timerMode={deskFlow.timerMode} secondsLeft={deskFlow.secondsLeft} timerRunning={deskFlow.timerRunning} onModeChange={deskFlow.setMode} onReset={deskFlow.resetTimer} onToggle={() => deskFlow.setTimerRunning((running) => !running)} />
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />

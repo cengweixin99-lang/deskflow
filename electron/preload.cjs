@@ -13,6 +13,18 @@ contextBridge.exposeInMainWorld('desktop', {
   browserBack: () => ipcRenderer.send('browser:back'),
   browserForward: () => ipcRenderer.send('browser:forward'),
   browserReload: () => ipcRenderer.send('browser:reload'),
+  setWindowModalActive: (active) => ipcRenderer.send('window:set-modal-active', active),
+  isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
+  minimizeWindow: () => ipcRenderer.send('window:minimize'),
+  toggleMaximizeWindow: () => ipcRenderer.send('window:toggle-maximize'),
+  closeWindow: () => ipcRenderer.send('window:close'),
+  onWindowMaximizedChange: (handler) => {
+    const listener = (_event, maximized) => {
+      if (typeof maximized === 'boolean') handler(maximized)
+    }
+    ipcRenderer.on('window:maximized-state', listener)
+    return () => ipcRenderer.removeListener('window:maximized-state', listener)
+  },
   onBrowserNavigate: (handler) => {
     const listener = (_event, url) => handler(url)
     ipcRenderer.on('browser:navigate', listener)

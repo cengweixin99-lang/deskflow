@@ -12,6 +12,12 @@ interface DesktopApi {
   browserBack: () => void
   browserForward: () => void
   browserReload: () => void
+  setWindowModalActive: (active: boolean) => void
+  isWindowMaximized: () => Promise<boolean>
+  minimizeWindow: () => void
+  toggleMaximizeWindow: () => void
+  closeWindow: () => void
+  onWindowMaximizedChange: (handler: (maximized: boolean) => void) => () => void
   onBrowserNavigate: (handler: (url: string) => void) => () => void
 }
 

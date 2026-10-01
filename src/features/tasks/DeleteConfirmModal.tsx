@@ -1,7 +1,8 @@
-import { AlertTriangle, Trash2, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 import { useEffect } from "react";
 import "./DeleteConfirmModal.css";
 import type { Task } from "../../types";
+import { useWindowModalState } from "../../hooks/useWindowModalState";
 
 interface DeleteConfirmModalProps {
   task: Task;
@@ -10,6 +11,7 @@ interface DeleteConfirmModalProps {
 }
 
 export function DeleteConfirmModal({ task, onCancel, onConfirm }: DeleteConfirmModalProps) {
+  useWindowModalState();
   useEffect(() => {
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key === "Escape") onCancel();
@@ -53,7 +55,6 @@ export function DeleteConfirmModal({ task, onCancel, onConfirm }: DeleteConfirmM
             取消
           </button>
           <button className="confirm-delete-button" type="button" onClick={onConfirm}>
-            <Trash2 size={15} />
             删除
           </button>
         </footer>
