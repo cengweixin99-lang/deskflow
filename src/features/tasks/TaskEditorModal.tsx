@@ -21,6 +21,17 @@ export function TaskEditorModal({ mode, task, initialDate = getDateKey(), onClos
   const [notes, setNotes] = useState(task?.notes ?? "");
   const [error, setError] = useState("");
   const titleRef = useRef<HTMLInputElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    return () => {
+      const returnTarget = returnFocusRef.current;
+      requestAnimationFrame(() => {
+        if (returnTarget?.isConnected) returnTarget.focus();
+      });
+    };
+  }, []);
 
   useEffect(() => {
     setTitle(task?.title ?? "");
