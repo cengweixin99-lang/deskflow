@@ -83,6 +83,23 @@
 .task-editor-date input {
   min-height: 38px;
 }
+.task-date-change-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 11px;
+  color: #8a664e;
+  background: #fbf4eb;
+  border: 1px solid #eedcca;
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.task-date-change-notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #d4845f;
+}
 .task-editor-error {
   color: #c85d42;
   font-size: 11px;
@@ -114,6 +131,38 @@
 }
 .save-task-button:hover {
   background: #d96d4f;
+}
+.priority-choice {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  color: #a5a49c;
+  background: transparent;
+  font-size: 10px;
+}
+.priority-choice i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+.priority-choice.selected {
+  color: #4d4c46;
+  font-weight: 600;
+}
+.priority-choice.selected i {
+  opacity: 1;
+}
+.priority-choice.high {
+  color: #df7d64;
+}
+.priority-choice.medium {
+  color: #d4a052;
+}
+.priority-choice.low {
+  color: #719c8a;
 }
 @media (max-width: 560px) {
   .task-editor-row {

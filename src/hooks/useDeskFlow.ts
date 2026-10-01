@@ -1,16 +1,13 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../lib/feeds";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
-import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskFilter, TaskInput, TaskPriority, TimerMode } from "../types";
+import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskFilter, TaskInput, TimerMode } from "../types";
 
 export function useDeskFlow() {
   const [state, setState] = useState<AppState>(createEmptyAppState);
   const [loaded, setLoaded] = useState(false);
   const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
-  const [draft, setDraft] = useState("");
-  const [draftDate, setDraftDate] = useState(getDateKey);
-  const [priority, setPriority] = useState<TaskPriority>("medium");
   const [timerMode, setTimerMode] = useState<TimerMode>("focus");
   const [secondsLeft, setSecondsLeft] = useState(25 * 60);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -86,27 +83,23 @@ export function useDeskFlow() {
     ? Math.round((completedToday / todayTasks.length) * 100)
     : 0;
 
-  function addTask(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const title = draft.trim();
-    if (!title) return;
+  function addTask(input: TaskInput): Task | null {
+    const title = input.title.trim();
     const today = getDateKey();
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(draftDate) && draftDate >= today ? draftDate : today;
+    if (!title || !/^\d{4}-\d{2}-\d{2}$/.test(input.date) || input.date < today) return null;
+    const task: Task = {
+      id: crypto.randomUUID(),
+      title,
+      completed: false,
+      priority: input.priority,
+      date: input.date,
+      notes: input.notes.trim(),
+    };
     setState((current) => ({
       ...current,
-      tasks: [
-        {
-          id: crypto.randomUUID(),
-          title,
-          completed: false,
-          priority,
-          date,
-          notes: "",
-        },
-        ...current.tasks,
-      ],
+      tasks: [task, ...current.tasks],
     }));
-    setDraft("");
+    return task;
   }
 
   function toggleTask(id: string) {
@@ -295,12 +288,6 @@ export function useDeskFlow() {
     state,
     taskFilter,
     setTaskFilter,
-    draft,
-    setDraft,
-    draftDate,
-    setDraftDate,
-    priority,
-    setPriority,
     timerMode,
     setMode,
     secondsLeft,
