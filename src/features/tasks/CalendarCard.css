@@ -119,40 +119,10 @@
   color: #4b4a44;
   font-size: 11px;
 }
-.history-add-button {
-  min-height: 28px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: 0 0 auto;
-  padding: 6px 8px;
-  color: #c96b4e;
-  background: #fbf0ea;
-  border-radius: 6px;
-  font-size: 9px;
-  font-weight: 600;
-}
-.history-add-button:not(:disabled):hover {
-  color: #b85e43;
-  background: #f7e5dc;
-}
-.history-add-button:focus-visible {
-  outline: 2px solid #d98966;
-  outline-offset: 2px;
-}
-.history-add-button:disabled {
-  color: #aaa9a1;
-  background: #f3f2ed;
-  cursor: not-allowed;
-}
-.history-create-note,
+.history-heading span,
 .history-empty {
   color: #aaa9a1;
   font-size: 9px;
-}
-.history-create-note {
-  margin: 9px 0 0;
-  line-height: 1.5;
 }
 .history-list {
   display: grid;
