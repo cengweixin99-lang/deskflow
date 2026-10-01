@@ -13,7 +13,7 @@ import type {
   TaskPriority,
 } from "../types";
 
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -50,12 +50,17 @@ function normalizeTask(value: unknown, today: string): Task | null {
   const id = nonEmptyString(value.id);
   const title = nonEmptyString(value.title);
   if (!id || !title) return null;
+  const date = isDateKey(value.date) ? value.date : today;
+  const fallbackCreatedAt = new Date(`${date}T00:00:00`).toISOString();
+  const savedCreatedAt = timestampValue(value.createdAt, fallbackCreatedAt)!;
+  const createdAt = getDateKey(new Date(savedCreatedAt)) <= date ? savedCreatedAt : fallbackCreatedAt;
   return {
     id,
     title,
+    createdAt,
     completed: value.completed === true,
     priority: priorityValue(value.priority),
-    date: isDateKey(value.date) ? value.date : today,
+    date,
     notes: stringValue(value.notes),
   };
 }
@@ -173,10 +178,11 @@ function migrateToCurrentSchema(saved: Record<string, unknown>): Record<string, 
   if (version <= 1) {
     migrated = {
       ...migrated,
-      schemaVersion: CURRENT_SCHEMA_VERSION,
+      schemaVersion: 2,
       activeTimer: null,
     };
   }
+  if (version <= 2) migrated = { ...migrated, schemaVersion: CURRENT_SCHEMA_VERSION };
   return migrated;
 }
 

@@ -13,7 +13,7 @@
     "test": "npm run test:state && npm run test:focus && npm run test:tasks && npm run test:feeds",
     "test:feeds": "node tests/feeds.cjs",
     "test:focus": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test tests/focus-timer.mjs tests/focus-sessions.mjs",
-    "test:tasks": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test tests/task-focus-history.mjs",
+    "test:tasks": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test tests/task-dates.mjs tests/task-focus-history.mjs",
     "test:state": "node --test tests/state-store.cjs tests/state-migration.cjs",
     "check": "npm run typecheck && npm test && npm run build"
   },
