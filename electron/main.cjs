@@ -14,7 +14,7 @@ const { fetchText } = require('./network.cjs')
 const { isStatePayload, readStateFile, writeStateFile } = require('./state-store.cjs')
 
 const isDev = !app.isPackaged
-const CURRENT_SCHEMA_VERSION = 1
+const CURRENT_SCHEMA_VERSION = 2
 
 const modalWindows = new WeakSet()
 let quitting = false
@@ -47,6 +47,7 @@ const defaultState = {
   groups: [],
   articles: [],
   focusSessions: [],
+  activeTimer: null,
   dailyReflections: [],
 }
 

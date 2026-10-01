@@ -9,6 +9,7 @@ interface FocusCardProps {
   secondsLeft: number;
   timerRunning: boolean;
   sessionActive: boolean;
+  timerRestored: boolean;
   tasks: Task[];
   selectedTaskId: string;
   selectionLocked: boolean;
@@ -21,7 +22,7 @@ interface FocusCardProps {
   onToggle: () => void;
 }
 
-export function FocusCard({ timerMode, secondsLeft, timerRunning, sessionActive, tasks, selectedTaskId, selectionLocked, activeTaskId, activeTaskTitle, onTaskChange, onModeChange, onReset, onStop, onToggle }: FocusCardProps) {
+export function FocusCard({ timerMode, secondsLeft, timerRunning, sessionActive, timerRestored, tasks, selectedTaskId, selectionLocked, activeTaskId, activeTaskTitle, onTaskChange, onModeChange, onReset, onStop, onToggle }: FocusCardProps) {
   const [taskPickerOpen, setTaskPickerOpen] = useState(false);
   const taskPickerRef = useRef<HTMLDivElement>(null);
   const taskTriggerRef = useRef<HTMLButtonElement>(null);
@@ -118,7 +119,7 @@ export function FocusCard({ timerMode, secondsLeft, timerRunning, sessionActive,
       </div>
       {timerMode === "focus" ? (
         <div className="focus-task-field">
-          <span className="focus-task-label" id={taskLabelId}><ListTodo size={13} />关联任务{selectionLocked && <small><LockKeyhole size={11} />已锁定</small>}</span>
+          <span className="focus-task-label" id={taskLabelId}><ListTodo size={13} />关联任务{selectionLocked && <small>{timerRestored ? <RotateCcw size={11} /> : <LockKeyhole size={11} />}{timerRestored ? "已恢复" : "已锁定"}</small>}</span>
           <div className={`focus-task-picker${taskPickerOpen ? " open" : ""}`} ref={taskPickerRef}>
             <button
               className="focus-task-trigger"
@@ -155,14 +156,16 @@ export function FocusCard({ timerMode, secondsLeft, timerRunning, sessionActive,
               </div>
             )}
           </div>
-          <small className="focus-task-help">
-            {selectionLocked
+          <small className="focus-task-help" role={timerRestored ? "status" : undefined}>
+            {timerRestored
+              ? activeTaskTitle ? `已恢复与“${activeTaskTitle}”关联的上次专注。` : "已恢复上次未关联任务的专注。"
+              : selectionLocked
               ? activeTaskTitle ? `本次专注已关联“${activeTaskTitle}”，暂停后可以继续。` : "本次专注未关联任务，暂停后可以继续。"
               : tasks.length ? "选择后，本次专注时间会记到对应任务。" : "暂无未完成任务，也可以直接开始无关联专注。"}
           </small>
         </div>
       ) : (
-        <div className="focus-task-rest"><Coffee size={14} /><span>{sessionActive ? "休息计时中，右上角可以提前结束" : "休息时段不关联任务"}</span></div>
+        <div className="focus-task-rest" role={timerRestored ? "status" : undefined}><Coffee size={14} /><span>{timerRestored ? "已恢复上次休息计时" : sessionActive ? "休息计时中，右上角可以提前结束" : "休息时段不关联任务"}</span></div>
       )}
       <div className="timer-display"><span>{minutes}</span><b>:</b><span>{seconds}</span></div>
       <div className="timer-mode">
