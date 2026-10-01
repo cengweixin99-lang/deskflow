@@ -1,6 +1,6 @@
 import { Pause, Play, RotateCcw, Target } from "lucide-react";
 import "./FocusCard.css";
-import type { TimerMode } from "../types";
+import type { TimerMode } from "../../types";
 
 interface FocusCardProps { timerMode: TimerMode; secondsLeft: number; timerRunning: boolean; onModeChange: (mode: TimerMode) => void; onReset: () => void; onToggle: () => void; }
 

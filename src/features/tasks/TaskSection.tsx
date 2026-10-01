@@ -2,7 +2,7 @@ import { CalendarDays, Check, CheckCircle2, Circle, Flag, ListFilter, Pencil, Pl
 import { useState } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
-import type { Task, TaskFilter } from "../types";
+import type { Task, TaskFilter } from "../../types";
 
 interface TaskSectionProps {
   filter: TaskFilter;

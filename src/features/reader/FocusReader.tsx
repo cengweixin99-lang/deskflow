@@ -28,7 +28,7 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from "react";
-import type { FeedArticle, FeedGroup, FeedSource, FocusFilter } from "../types";
+import type { FeedArticle, FeedGroup, FeedSource, FocusFilter } from "../../types";
 
 interface FocusReaderProps {
   feeds: FeedSource[];

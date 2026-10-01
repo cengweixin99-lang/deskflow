@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../lib/feeds";
+import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
 import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskFilter, TaskInput, TimerMode } from "../types";

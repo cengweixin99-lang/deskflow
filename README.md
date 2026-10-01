@@ -7,6 +7,7 @@ DeskFlow 是一个本地优先的个人工作台，用 Electron + React + TypeSc
 - `ROADMAP.md`：产品目标、版本路线和功能优先级。
 - `UI_GUIDELINES.md`：DeskFlow 的视觉、交互、状态和可访问性规范。
 - `AGENTS.md`：Coding Agent 的开发流程、架构边界和验证要求。
+- `docs/architecture.md`：当前目录职责、模块边界和后续代码放置规则。
 
 ## 运行项目
 
@@ -21,24 +22,28 @@ npm run dev
 
 ## 你正在学习的 Electron 结构
 
-- `electron/main.cjs`：主进程。使用 Electron 生态中更常见的 CommonJS，负责创建窗口、读写本地文件、发送系统通知。
+- `electron/main.cjs`：主进程入口。负责应用与窗口生命周期、状态协调、系统通知和 IPC 注册。
 - `electron/preload.cjs`：安全桥梁。使用 CommonJS，向页面暴露存档、订阅拉取、系统通知和内嵌浏览器控制接口。
+- `electron/browser-view.cjs`：内嵌网页的创建、导航、尺寸和生命周期。
+- `electron/network.cjs`：订阅请求、URL 校验和响应限制。
+- `electron/state-store.cjs`：本地存档读取、备份恢复和原子写入。
 - `src/main.tsx`：渲染进程入口，只负责挂载 React 根节点。
 - `src/App.tsx`：页面组合层，连接状态 hook 和业务组件。
-- `src/components/`：侧栏、任务区、专注卡片、日历等独立 UI 模块。
+- `src/components/`：跨功能或应用外壳组件，目前包含侧栏。
+- `src/features/`：按任务、专注和阅读组织已经形成边界的功能代码。
 - `src/hooks/useDeskFlow.ts`：任务持久化、任务操作和专注计时状态。
 - `src/types.ts`：任务、视图和计时器的共享类型。
 - `src/env.d.ts`：TypeScript 类型声明，包括 `window.desktop` 的 preload API。
 - `tsconfig.json`：TypeScript 严格类型检查配置。
-- `src/styles.css`：界面样式。
+- `src/styles/`：全局基础样式和跨组件共享样式。
 - `vite.config.js`：开发服务器和生产构建配置。
 
 ## 建议的学习顺序
 
-1. 先在 `src/components/TaskSection.tsx` 里修改任务标题和颜色，熟悉 React 组件。
+1. 先在 `src/features/tasks/TaskSection.tsx` 里修改任务标题和颜色，熟悉 React 组件。
 2. 阅读 `addTask`、`toggleTask` 和 `deleteTask`，理解事件如何更新状态。
 3. 阅读 `src/hooks/useDeskFlow.ts`，理解状态如何从界面组件中分离出来。
-4. 阅读 `electron/preload.cjs` 和 `electron/main.cjs`，理解为什么文件读写放在主进程，页面只通过 IPC 调用。
+4. 阅读 `electron/preload.cjs`、`electron/main.cjs` 和 `electron/state-store.cjs`，理解为什么文件读写放在主进程，页面只通过 IPC 调用。
 5. 给任务增加截止日期或备注，并同步更新 `types.ts` 和对应组件。
 6. 再考虑搜索、快捷键、托盘菜单、自动启动和安装包。
 

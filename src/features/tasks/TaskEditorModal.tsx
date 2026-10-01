@@ -1,8 +1,8 @@
 import { CalendarClock, CalendarDays, ClipboardPenLine, Plus, Save, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import "./TaskEditorModal.css";
-import { formatDateLabel, getDateKey } from "../types";
-import type { Task, TaskInput, TaskPriority } from "../types";
+import { formatDateLabel, getDateKey } from "../../types";
+import type { Task, TaskInput, TaskPriority } from "../../types";
 
 interface TaskEditorModalProps {
   mode: "create" | "edit";

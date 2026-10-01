@@ -35,7 +35,7 @@ if (typeof electron === 'string') {
       const built = await build({
         configFile: false, publicDir: false, logLevel: 'silent',
         build: { write: false, minify: false, lib: {
-          entry: path.join(__dirname, '../src/lib/feeds.ts'), formats: ['cjs'],
+          entry: path.join(__dirname, '../src/features/reader/feeds.ts'), formats: ['cjs'],
         } },
       })
       const bundle = Array.isArray(built) ? built[0] : built

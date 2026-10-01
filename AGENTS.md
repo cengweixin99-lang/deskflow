@@ -1,6 +1,6 @@
 # AGENTS.md
 
-本文件适用于整个仓库。开始开发前先阅读 `README.md`、`ROADMAP.md` 和 `UI_GUIDELINES.md`。
+本文件适用于整个仓库。开始开发前先阅读 `README.md`、`ROADMAP.md`、`UI_GUIDELINES.md` 和 `docs/architecture.md`。
 
 ## 项目使命
 
@@ -72,14 +72,19 @@ DeskFlow 是一个本地优先的个人注意力与成长记录系统，帮助�
 
 ## 架构概览
 
-- `electron/main.cjs`：Electron 主进程，负责窗口、文件读写、网络请求、通知和内嵌浏览器。
+- `docs/architecture.md`：当前目录职责、依赖边界和代码放置规则；调整结构前先更新判断依据。
+- `electron/main.cjs`：Electron 主进程入口，负责应用与窗口生命周期、状态协调和 IPC 注册。
 - `electron/preload.cjs`：受控 IPC 桥接层。
+- `electron/browser-view.cjs`：内嵌浏览器的创建、导航、尺寸和生命周期。
+- `electron/network.cjs`：外部 URL 校验和订阅网络请求。
+- `electron/state-store.cjs`：本地存档读取、备份恢复和原子写入。
 - `src/App.tsx`：页面组合和顶层导航。
-- `src/components/`：界面组件。
+- `src/components/`：跨功能或应用外壳界面组件。
+- `src/features/`：按任务、专注和阅读组织已经形成边界的功能代码。
 - `src/hooks/useDeskFlow.ts`：当前主要状态和业务逻辑；新增复杂功能时按领域逐步拆分，避免继续无限增大。
-- `src/lib/feeds.ts`：订阅发现、解析和分页逻辑。
+- `src/lib/state.ts`：跨功能的状态默认值、归一化和迁移。
 - `src/types.ts`：共享领域类型。
-- `tests/feeds.cjs`：RSS 回归测试。
+- `tests/`：保持扁平的回归测试；测试数量明显增长后再按领域拆分。
 
 ## 开发规范
 
