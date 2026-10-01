@@ -2,6 +2,12 @@
 
 DeskFlow 是一个本地优先的个人工作台，用 Electron + React + TypeScript 构建，包含待办清单、番茄钟和 RSS 阅读流。订阅源、文章阅读状态和收藏保存在本机，不依赖账号和云服务。
 
+## 项目文档
+
+- `ROADMAP.md`：产品目标、版本路线和功能优先级。
+- `UI_GUIDELINES.md`：DeskFlow 的视觉、交互、状态和可访问性规范。
+- `AGENTS.md`：Coding Agent 的开发流程、架构边界和验证要求。
+
 ## 运行项目
 
 需要 Node.js 18 或更高版本。
