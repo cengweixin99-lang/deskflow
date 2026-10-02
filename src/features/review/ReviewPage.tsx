@@ -2,8 +2,10 @@ import { BookOpenText, CalendarDays, ChevronLeft, ChevronRight, ClipboardList, C
 import { useMemo, useState } from "react";
 import type { DailyReflection, FocusSession, ReadingAction, Task } from "../../types";
 import { getDateKey } from "../../types";
+import { DailyStats } from "./DailyStats";
 import { DailyTimeline } from "./DailyTimeline";
 import { getDailyRecordOverview, isReviewDateAllowed, shiftReviewDate } from "./dailyRecords";
+import { getDailyStats } from "./stats";
 import { getDailyTimelineItems } from "./timeline";
 import "./ReviewPage.css";
 
@@ -41,6 +43,11 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
     focusSessions,
     readingActions,
   }), [focusSessions, readingActions, selectedDate, tasks]);
+  const dailyStats = useMemo(() => getDailyStats({
+    date: selectedDate,
+    tasks,
+    focusSessions,
+  }), [focusSessions, selectedDate, tasks]);
 
   function selectDate(date: string) {
     if (!isReviewDateAllowed(date, today)) return false;
@@ -106,6 +113,7 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
       {overview.hasRecords ? (
         <>
           <p className="review-fact-note">这里只呈现已经保存在本机的事实，不会把记录数量换算成单一效率评分。</p>
+          <DailyStats stats={dailyStats} />
           <DailyTimeline items={timelineItems} />
         </>
       ) : (

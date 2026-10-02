@@ -42,6 +42,7 @@ tests/
 ├── focus-sessions.mjs
 ├── focus-timer.mjs
 ├── daily-records.mjs
+├── daily-stats.mjs
 ├── reading-actions.mjs
 ├── review-timeline.mjs
 ├── state-migration.cjs
@@ -83,6 +84,7 @@ tests/
 - `tests/focus-sessions.mjs`：专注记录创建、实际投入和补充文字更新测试。
 - `tests/focus-timer.mjs`：专注计时的时间戳推进、暂停恢复、持久化归一化和完成边界测试。
 - `tests/daily-records.mjs`：回顾日期边界和任务、专注、回顾记录概览测试。
+- `tests/daily-stats.mjs`：计划完成率、实际专注时长和提前结束记录的派生统计测试。
 - `tests/reading-actions.mjs`：文章打开事件的文章与订阅源快照测试。
 - `tests/review-timeline.mjs`：任务计划、专注和阅读行动的日期筛选与时间排序测试。
 - `tests/state-migration.cjs`：存档版本迁移、活动计时恢复和异常值过滤测试。
