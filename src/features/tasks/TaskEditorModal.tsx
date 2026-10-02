@@ -121,12 +121,11 @@ export function TaskEditorModal({ mode, task, initialDate = getDateKey(), onClos
           </div>
           {dateChangeMessage && <div className="task-date-change-notice"><CalendarClock size={15} /><span>{dateChangeMessage}</span></div>}
           <label className="task-editor-field">
-            <span>记录</span>
-            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="记录这件事的背景、结果或下一步..." />
+            <span>备注</span>
+            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="补充这件事的背景或说明..." />
           </label>
           {error && <p className="task-editor-error" id="task-editor-error" role="alert">{error}</p>}
           <footer className="task-editor-footer">
-            <span>{notes.length} 字记录</span>
             <div><button className="cancel-button" type="button" onClick={onClose}>取消</button><button className="save-task-button" type="submit">{mode === "create" && <Plus size={15} />}{mode === "create" ? "添加任务" : "保存任务"}</button></div>
           </footer>
         </form>
