@@ -22,7 +22,7 @@ function isStatePayload(value, schemaVersion) {
   if (!isRecord(value) || value.schemaVersion !== schemaVersion) return false
   if (typeof value.focusMinutes !== 'number' || !Number.isFinite(value.focusMinutes) || value.focusMinutes < 0) return false
   if (!isActiveTimerPayload(value.activeTimer)) return false
-  return ['tasks', 'feeds', 'groups', 'articles', 'focusSessions', 'dailyReflections']
+  return ['tasks', 'feeds', 'groups', 'articles', 'readingActions', 'focusSessions', 'dailyReflections']
     .every((key) => Array.isArray(value[key]))
 }
 

@@ -8,12 +8,13 @@ import type {
   FeedSource,
   FocusSession,
   FocusSessionStatus,
+  ReadingAction,
   ReflectionScore,
   Task,
   TaskPriority,
 } from "../types";
 
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 4;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -117,6 +118,24 @@ function normalizeArticle(value: unknown, feedIds: Set<string>): FeedArticle | n
   };
 }
 
+function normalizeReadingAction(value: unknown): ReadingAction | null {
+  if (!isRecord(value)) return null;
+  const id = nonEmptyString(value.id);
+  const articleId = nonEmptyString(value.articleId);
+  const articleTitle = nonEmptyString(value.articleTitle);
+  const openedAt = timestampValue(value.openedAt);
+  if (!id || !articleId || !articleTitle || !openedAt) return null;
+  return {
+    id,
+    articleId,
+    articleTitle,
+    articleLink: stringValue(value.articleLink),
+    feedId: stringValue(value.feedId),
+    feedTitle: stringValue(value.feedTitle),
+    openedAt,
+  };
+}
+
 function sessionStatusValue(value: unknown): FocusSessionStatus {
   if (value === "active" || value === "completed" || value === "stopped") return value;
   return "stopped";
@@ -182,7 +201,8 @@ function migrateToCurrentSchema(saved: Record<string, unknown>): Record<string, 
       activeTimer: null,
     };
   }
-  if (version <= 2) migrated = { ...migrated, schemaVersion: CURRENT_SCHEMA_VERSION };
+  if (version <= 2) migrated = { ...migrated, schemaVersion: 3 };
+  if (version <= 3) migrated = { ...migrated, schemaVersion: CURRENT_SCHEMA_VERSION, readingActions: [] };
   return migrated;
 }
 
@@ -194,6 +214,7 @@ export function createEmptyAppState(): AppState {
     feeds: [],
     groups: [],
     articles: [],
+    readingActions: [],
     focusSessions: [],
     activeTimer: null,
     dailyReflections: [],
@@ -227,6 +248,7 @@ export function migrateAppState(value: unknown): AppState {
     feeds,
     groups,
     articles: arrayValue(saved.articles).map((article) => normalizeArticle(article, feedIds)).filter((article): article is FeedArticle => article !== null),
+    readingActions: arrayValue(saved.readingActions).map(normalizeReadingAction).filter((action): action is ReadingAction => action !== null),
     focusSessions: arrayValue(saved.focusSessions).map((session) => normalizeFocusSession(session, tasksById)).filter((session): session is FocusSession => session !== null),
     activeTimer,
     dailyReflections: [...reflectionsByDate.values()],

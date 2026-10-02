@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/reader/feeds";
+import { recordArticleOpen } from "../features/reader/readingActions";
 import { createFocusSession, updateFocusSessionNote } from "../features/focus/sessions";
 import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerCompletionTime, getTimerDurationSeconds, getTimerProgress, pauseTimerProgress } from "../features/focus/timer";
 import { canScheduleTaskOn } from "../features/tasks/taskDates";
@@ -342,6 +343,27 @@ export function useDeskFlow() {
     }));
   }
 
+  function recordReadingAction(articleId: string) {
+    const actionId = crypto.randomUUID();
+    const openedAt = new Date().toISOString();
+    setState((current) => {
+      const next = recordArticleOpen({
+        articleId,
+        actionId,
+        openedAt,
+        articles: current.articles,
+        feeds: current.feeds,
+        readingActions: current.readingActions,
+      });
+      if (next.articles === current.articles) return current;
+      return {
+        ...current,
+        articles: next.articles,
+        readingActions: next.readingActions,
+      };
+    });
+  }
+
   function setMode(mode: TimerMode) {
     if (activeTimerContext) return;
     setTimerMode(mode);
@@ -493,6 +515,7 @@ export function useDeskFlow() {
     removeFeedGroup,
     setFeedGroup,
     updateArticle,
+    recordReadingAction,
     feedsBusy,
     subscribing,
   };

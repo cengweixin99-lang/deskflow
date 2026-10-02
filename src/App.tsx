@@ -158,9 +158,9 @@ export function App() {
             </aside>
           </div>
         ) : activeSection === "review" ? (
-          <ReviewPage tasks={state.tasks} focusSessions={state.focusSessions} dailyReflections={state.dailyReflections} onGoToTasks={() => setActiveSection("tasks")} />
+          <ReviewPage tasks={state.tasks} focusSessions={state.focusSessions} readingActions={state.readingActions} dailyReflections={state.dailyReflections} onGoToTasks={() => setActiveSection("tasks")} />
         ) : (
-          <FocusReader feeds={state.feeds} groups={state.groups} articles={state.articles} feedsBusy={deskFlow.feedsBusy} subscribing={deskFlow.subscribing} onSubscribe={deskFlow.subscribeFeed} onRefresh={deskFlow.refreshFeeds} onRemoveFeed={deskFlow.removeFeed} onUpdateArticle={deskFlow.updateArticle} onAddGroup={deskFlow.addFeedGroup} onRenameGroup={deskFlow.renameFeedGroup} onRemoveGroup={deskFlow.removeFeedGroup} onSetFeedGroup={deskFlow.setFeedGroup} />
+          <FocusReader feeds={state.feeds} groups={state.groups} articles={state.articles} feedsBusy={deskFlow.feedsBusy} subscribing={deskFlow.subscribing} onSubscribe={deskFlow.subscribeFeed} onRefresh={deskFlow.refreshFeeds} onRemoveFeed={deskFlow.removeFeed} onUpdateArticle={deskFlow.updateArticle} onOpenArticle={deskFlow.recordReadingAction} onAddGroup={deskFlow.addFeedGroup} onRenameGroup={deskFlow.renameFeedGroup} onRemoveGroup={deskFlow.removeFeedGroup} onSetFeedGroup={deskFlow.setFeedGroup} />
         )}
       </main>
       {taskEditor?.mode === "create" && <TaskEditorModal mode="create" initialDate={taskEditor.initialDate} onClose={() => setTaskEditor(null)} onSave={createTask} />}

@@ -45,6 +45,16 @@ export interface FeedArticle {
   saved: boolean;
 }
 
+export interface ReadingAction {
+  id: string;
+  articleId: string;
+  articleTitle: string;
+  articleLink: string;
+  feedId: string;
+  feedTitle: string;
+  openedAt: string;
+}
+
 export interface FocusSession {
   id: string;
   taskId: string | null;
@@ -93,6 +103,7 @@ export interface AppState {
   feeds: FeedSource[];
   groups: FeedGroup[];
   articles: FeedArticle[];
+  readingActions: ReadingAction[];
   focusSessions: FocusSession[];
   activeTimer: ActiveTimerState | null;
   dailyReflections: DailyReflection[];
