@@ -75,15 +75,6 @@ export function App() {
     });
   }
 
-  function postponeTask(task: Task, date: string) {
-    updateTask(task, {
-      title: task.title,
-      priority: task.priority,
-      date,
-      notes: task.notes,
-    });
-  }
-
   const taskNoticeTitle = taskNotice
     ? {
         created: "任务已安排",
@@ -108,7 +99,7 @@ export function App() {
       <main className="main-content">
         {activeSection === "tasks" ? (
           <div className="content-grid">
-            <TaskSection filter={taskFilter} filterCounts={deskFlow.taskFilterCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onFilterChange={deskFlow.setTaskFilter} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
+            <TaskSection filter={taskFilter} filterCounts={deskFlow.taskFilterCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onFilterChange={deskFlow.setTaskFilter} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} />
             <aside className="right-column">
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
             </aside>

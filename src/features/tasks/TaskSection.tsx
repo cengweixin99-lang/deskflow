@@ -1,10 +1,9 @@
-import { CalendarClock, Check, CheckCircle2, Circle, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, CheckCircle2, Circle, Flag, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
-import { PostponeTaskModal } from "./PostponeTaskModal";
 import { getDateKey } from "../../types";
-import type { Task, TaskFilter } from "../../types";
+import type { Task, TaskFilter, TaskPriority } from "../../types";
 
 interface TaskSectionProps {
   filter: TaskFilter;
@@ -16,7 +15,6 @@ interface TaskSectionProps {
   onToggleTask: (task: Task) => void;
   onDeleteTask: (id: string) => void;
   onEditTask: (task: Task) => void;
-  onPostponeTask: (task: Task, date: string) => void;
 }
 
 const filterLabels: Record<TaskFilter, string> = {
@@ -31,6 +29,12 @@ const emptyStateLabels: Record<TaskFilter, string> = {
   completed: "今天没有已完成 TODO",
 };
 
+const priorityLabels: Record<TaskPriority, string> = {
+  high: "高优先级",
+  medium: "中优先级",
+  low: "低优先级",
+};
+
 export function TaskSection({
   filter,
   filterCounts,
@@ -41,10 +45,8 @@ export function TaskSection({
   onToggleTask,
   onDeleteTask,
   onEditTask,
-  onPostponeTask,
 }: TaskSectionProps) {
   const [pendingDelete, setPendingDelete] = useState<Task | null>(null);
-  const [pendingPostpone, setPendingPostpone] = useState<Task | null>(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterControlRef = useRef<HTMLDivElement>(null);
   const filterTriggerRef = useRef<HTMLButtonElement>(null);
@@ -170,7 +172,7 @@ export function TaskSection({
       ) : (
         <div className="task-list">
           {visibleTasks.map((task) => (
-            <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} onPostpone={setPendingPostpone} />
+            <TaskItem key={task.id} task={task} onToggle={onToggleTask} onDelete={setPendingDelete} onEdit={onEditTask} />
           ))}
         </div>
       )}
@@ -184,13 +186,6 @@ export function TaskSection({
           }}
         />
       )}
-      {pendingPostpone && (
-        <PostponeTaskModal
-          task={pendingPostpone}
-          onCancel={() => setPendingPostpone(null)}
-          onConfirm={(date) => onPostponeTask(pendingPostpone, date)}
-        />
-      )}
     </section>
   );
 }
@@ -200,13 +195,11 @@ function TaskItem({
   onToggle,
   onDelete,
   onEdit,
-  onPostpone,
 }: {
   task: Task;
   onToggle: (task: Task) => void;
   onDelete: (task: Task) => void;
   onEdit: (task: Task) => void;
-  onPostpone: (task: Task) => void;
 }) {
   return (
     <article className={task.completed ? "task-item completed" : "task-item"}>
@@ -221,11 +214,13 @@ function TaskItem({
       <div className="task-body">
         <div className="task-title-row">
           <button className="task-title-button" type="button" onClick={() => onEdit(task)} title="查看任务详情">{task.title}</button>
-          <span className={`priority-line ${task.priority}`} />
+          <span className={`task-priority ${task.priority}`} title={priorityLabels[task.priority]}>
+            <Flag size={12} aria-hidden="true" />
+            {priorityLabels[task.priority]}
+          </span>
         </div>
       </div>
       <div className="task-actions">
-        {!task.completed && <button className="task-action-button postpone-button" type="button" onClick={() => onPostpone(task)} aria-label={`推迟“${task.title}”`} title="推迟任务"><CalendarClock size={15} /></button>}
         <button className="task-action-button edit-button" type="button" onClick={() => onEdit(task)} aria-label={`编辑“${task.title}”`} title="编辑任务">
           <Pencil size={15} />
         </button>
