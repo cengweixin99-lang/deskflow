@@ -1,5 +1,5 @@
 import { CalendarClock, Check, CheckCircle2, Circle, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { PostponeTaskModal } from "./PostponeTaskModal";
@@ -45,11 +45,60 @@ export function TaskSection({
 }: TaskSectionProps) {
   const [pendingDelete, setPendingDelete] = useState<Task | null>(null);
   const [pendingPostpone, setPendingPostpone] = useState<Task | null>(null);
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const filterControlRef = useRef<HTMLDivElement>(null);
+  const filterTriggerRef = useRef<HTMLButtonElement>(null);
   const todayLabel = new Intl.DateTimeFormat("zh-CN", {
     weekday: "long",
     month: "long",
     day: "numeric",
   }).format(new Date());
+
+  useEffect(() => {
+    if (!filterMenuOpen) return undefined;
+    const frame = requestAnimationFrame(() => {
+      filterControlRef.current?.querySelector<HTMLButtonElement>('.task-filter-option[aria-checked="true"]')?.focus();
+    });
+    function closeOnPointerDown(event: PointerEvent) {
+      if (!filterControlRef.current?.contains(event.target as Node)) setFilterMenuOpen(false);
+    }
+    function closeOnFocusChange(event: FocusEvent) {
+      if (!filterControlRef.current?.contains(event.target as Node)) setFilterMenuOpen(false);
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setFilterMenuOpen(false);
+      filterTriggerRef.current?.focus();
+    }
+    document.addEventListener("pointerdown", closeOnPointerDown);
+    document.addEventListener("focusin", closeOnFocusChange);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("pointerdown", closeOnPointerDown);
+      document.removeEventListener("focusin", closeOnFocusChange);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [filterMenuOpen]);
+
+  function selectFilter(nextFilter: TaskFilter) {
+    onFilterChange(nextFilter);
+    setFilterMenuOpen(false);
+    requestAnimationFrame(() => filterTriggerRef.current?.focus());
+  }
+
+  function moveFilterFocus(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const options = Array.from(filterControlRef.current?.querySelectorAll<HTMLButtonElement>(".task-filter-option") ?? []);
+    if (!options.length) return;
+    const nextIndex = event.key === "Home"
+      ? 0
+      : event.key === "End"
+        ? options.length - 1
+        : (index + (event.key === "ArrowDown" ? 1 : -1) + options.length) % options.length;
+    options[nextIndex]?.focus();
+  }
 
   return (
     <section className="task-column">
@@ -79,19 +128,38 @@ export function TaskSection({
         <span>添加 TODO</span>
       </button>
 
-      <div className="task-list-toolbar">
-        <label className={filter === "all" ? "task-filter-control" : "task-filter-control active"} title={`筛选：${filterLabels[filter]}`}>
+      <div className="task-list-toolbar" ref={filterControlRef}>
+        <button
+          ref={filterTriggerRef}
+          className={filter === "all" ? "task-filter-trigger" : "task-filter-trigger active"}
+          type="button"
+          aria-label={`筛选今天的 TODO，当前：${filterLabels[filter]}`}
+          aria-haspopup="menu"
+          aria-expanded={filterMenuOpen}
+          title={`筛选：${filterLabels[filter]}`}
+          onClick={() => setFilterMenuOpen((open) => !open)}
+        >
           <ListFilter size={17} aria-hidden="true" />
-          <select
-            value={filter}
-            aria-label={`筛选今天的 TODO，当前：${filterLabels[filter]}`}
-            onChange={(event) => onFilterChange(event.target.value as TaskFilter)}
-          >
-            {(Object.keys(filterLabels) as TaskFilter[]).map((item) => (
-              <option key={item} value={item}>{filterLabels[item]}（{filterCounts[item]}）</option>
+        </button>
+        {filterMenuOpen && (
+          <div className="task-filter-menu" role="menu" aria-label="筛选今天的 TODO">
+            {(Object.keys(filterLabels) as TaskFilter[]).map((item, index) => (
+              <button
+                key={item}
+                className={filter === item ? "task-filter-option selected" : "task-filter-option"}
+                type="button"
+                role="menuitemradio"
+                aria-checked={filter === item}
+                onClick={() => selectFilter(item)}
+                onKeyDown={(event) => moveFilterFocus(event, index)}
+              >
+                <span>{filterLabels[item]}</span>
+                <small>{filterCounts[item]}</small>
+                <Check size={14} aria-hidden="true" />
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        )}
       </div>
 
       {visibleTasks.length === 0 ? (

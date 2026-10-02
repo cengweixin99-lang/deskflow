@@ -42,7 +42,7 @@ export function PostponeTaskModal({ task, onCancel, onConfirm }: PostponeTaskMod
         if (returnTarget?.isConnected) {
           returnTarget.focus();
         } else {
-          document.querySelector<HTMLElement>(".task-filter-control select")?.focus();
+          document.querySelector<HTMLElement>(".task-filter-trigger")?.focus();
         }
       });
     };
