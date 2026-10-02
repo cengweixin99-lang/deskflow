@@ -3,7 +3,6 @@
 interface DesktopApi {
   loadState: () => Promise<unknown>
   saveState: (state: import('./types').AppState) => Promise<import('./types').AppState>
-  showNotification: (payload: { title: string; body: string }) => void
   fetchText: (url: string) => Promise<import('./types').FetchedText>
   openBrowser: (url: string) => Promise<void>
   setBrowserBounds: (bounds: import('./types').BrowserBounds) => void

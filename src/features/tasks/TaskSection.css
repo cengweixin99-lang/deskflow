@@ -309,24 +309,6 @@ h1 {
 .priority-line.low {
   background: #71a08d;
 }
-.task-focus-summary {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #929188;
-  font-size: 9px;
-  font-variant-numeric: tabular-nums;
-}
-.task-focus-summary svg {
-  color: #7f9e91;
-}
-.task-focus-summary i {
-  width: 2px;
-  height: 2px;
-  margin: 0 2px;
-  background: #c5c4bc;
-  border-radius: 50%;
-}
 .task-actions {
   display: flex;
   align-items: center;

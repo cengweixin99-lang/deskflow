@@ -25,8 +25,6 @@ src/
 │   └── Sidebar.css
 ├── features/
 │   ├── tasks/
-│   ├── focus/
-│   ├── review/
 │   └── reader/
 ├── hooks/useDeskFlow.ts
 ├── lib/state.ts
@@ -39,17 +37,9 @@ src/
 
 tests/
 ├── feeds.cjs
-├── focus-sessions.mjs
-├── focus-timer.mjs
-├── daily-records.mjs
-├── daily-reflections.mjs
-├── daily-stats.mjs
-├── reading-actions.mjs
-├── review-timeline.mjs
 ├── state-migration.cjs
 ├── state-store.cjs
-├── task-dates.mjs
-└── task-focus-history.mjs
+└── task-dates.mjs
 ```
 
 ## Electron 主进程
@@ -64,14 +54,12 @@ tests/
 
 ## React 渲染进程
 
-- `src/App.tsx`：顶层页面组合、导航、回顾日期协调和跨功能入口，不承载底层解析或持久化实现。
+- `src/App.tsx`：顶层页面组合、导航和跨功能入口，不承载底层解析或持久化实现。
 - `src/components/`：跨功能或应用外壳组件。当前只有侧栏符合这个边界。
 - `src/features/tasks/`：任务列表、日历和任务编辑相关组件。
-- `src/features/focus/`：专注计时相关组件。
-- `src/features/review/`：每日回顾页面，以及按本地日期派生记录概览、统计、行动时间轴和更新个人回顾的逻辑。
 - `src/features/reader/`：订阅阅读界面以及订阅发现、解析和分页逻辑。
-- `src/hooks/useDeskFlow.ts`：当前应用状态与主要操作入口。保持现状，只有出现可独立测试且职责清晰的领域逻辑时再逐步拆分。
-- `src/lib/state.ts`：跨功能的状态默认值、归一化和迁移。
+- `src/hooks/useDeskFlow.ts`：任务、订阅与本地持久化的主要操作入口。保持现状，只有出现可独立测试且职责清晰的领域逻辑时再逐步拆分。
+- `src/lib/state.ts`：跨功能的状态默认值、归一化和迁移；已移除功能的历史字段仅在这里做兼容读取和无损保存。
 - `src/types.ts`：跨功能共享的领域类型和日期工具。
 - `src/styles/`：全局基础样式和跨组件共享样式。
 
@@ -82,23 +70,15 @@ tests/
 当前测试数量较少，继续使用扁平的 `tests/`：
 
 - `tests/feeds.cjs`：订阅发现、解析、分页和合并回归测试。
-- `tests/focus-sessions.mjs`：专注记录创建、实际投入和补充文字更新测试。
-- `tests/focus-timer.mjs`：专注计时的时间戳推进、暂停恢复、持久化归一化和完成边界测试。
-- `tests/daily-records.mjs`：回顾日期边界和任务、专注、回顾记录概览测试。
-- `tests/daily-reflections.mjs`：每日回顾的输入校验、单日更新和撤销恢复测试。
-- `tests/daily-stats.mjs`：计划完成率、实际专注时长和提前结束记录的派生统计测试。
-- `tests/reading-actions.mjs`：文章打开事件的文章与订阅源快照测试。
-- `tests/review-timeline.mjs`：任务计划、专注和阅读行动的日期筛选与时间排序测试。
-- `tests/state-migration.cjs`：存档版本迁移、活动计时恢复和异常值过滤测试。
+- `tests/state-migration.cjs`：存档版本迁移、旧版历史字段保留和异常值过滤测试。
 - `tests/state-store.cjs`：主进程存档读取、备份恢复和写入测试。
 - `tests/task-dates.mjs`：任务创建日下限和异常日期的业务规则测试。
-- `tests/task-focus-history.mjs`：任务关联专注记录的筛选、累计与时间排序测试。
 
 测试规模尚不需要镜像源码目录。新增测试时优先按被测模块命名；只有单一领域出现多个测试文件后，再为该领域建立子目录。
 
 ## 暂不拆分
 
 - 不创建 `.agents/`；当前 `AGENTS.md` 足以承载全仓库规则，本文件负责架构细节。
-- 不拆分 `src/types.ts`、`src/lib/state.ts` 或 `src/hooks/useDeskFlow.ts`，直到它们出现稳定且可独立维护的领域边界。
+- 不拆分 `src/types.ts`、`src/lib/state.ts` 或 `src/hooks/useDeskFlow.ts`，直到它们出现稳定且可独立维护的领域边界；兼容字段不单独形成产品模块。
 - 不增加路径别名、barrel 文件、状态管理库或新的测试框架。
 - 不把每个组件都变成独立目录；组件与同名样式并列即可。

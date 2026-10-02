@@ -23,7 +23,6 @@ async function loadStateModule(t) {
     '--rootDir', 'src',
     '--skipLibCheck',
     'src/lib/state.ts',
-    'src/features/focus/timer.ts',
     'src/types.ts',
   ], { cwd: path.join(__dirname, '..') })
   return require(outputPath)
@@ -113,4 +112,34 @@ test('active timers are normalized and invalid values are discarded', async (t) 
 
   const invalid = migrateAppState(statePayload({ schemaVersion: 4, activeTimer: { ...activeTimer, runningSince: 'not-a-date' } }))
   assert.equal(invalid.activeTimer, null)
+})
+
+test('removed focus and review features keep legacy history fields intact', async (t) => {
+  const { migrateAppState } = await loadStateModule(t)
+  const focusSession = {
+    id: 'focus-1',
+    taskId: 'deleted-task',
+    taskTitle: '历史任务快照',
+    startedAt: '2026-10-01T08:00:00.000Z',
+    endedAt: '2026-10-01T08:25:00.000Z',
+    durationSeconds: 1500,
+    status: 'completed',
+    note: '旧专注记录',
+  }
+  const reflection = {
+    date: '2026-10-01',
+    summary: '旧回顾记录',
+    energy: 4,
+    satisfaction: 3,
+    updatedAt: '2026-10-01T12:00:00.000Z',
+  }
+  const migrated = migrateAppState(statePayload({
+    schemaVersion: 4,
+    focusSessions: [focusSession],
+    dailyReflections: [reflection],
+    activeTimer: null,
+  }))
+
+  assert.deepEqual(migrated.focusSessions, [focusSession])
+  assert.deepEqual(migrated.dailyReflections, [reflection])
 })

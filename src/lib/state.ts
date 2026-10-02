@@ -1,6 +1,6 @@
 import { getDateKey } from "../types";
-import { normalizeActiveTimer } from "../features/focus/timer";
 import type {
+  ActiveTimerState,
   AppState,
   DailyReflection,
   FeedArticle,
@@ -36,6 +36,27 @@ function isDateKey(value: unknown): value is string {
 
 function timestampValue(value: unknown, fallback: string | null = null): string | null {
   return typeof value === "string" && !Number.isNaN(Date.parse(value)) ? value : fallback;
+}
+
+function normalizeLegacyActiveTimer(value: unknown, now = Date.now()): ActiveTimerState | null {
+  if (!isRecord(value) || (value.mode !== "focus" && value.mode !== "break")) return null;
+  const startedAt = timestampValue(value.startedAt);
+  const runningSince = value.runningSince === null ? null : timestampValue(value.runningSince);
+  if (!startedAt || typeof value.elapsedMilliseconds !== "number" || !Number.isFinite(value.elapsedMilliseconds) || value.elapsedMilliseconds < 0) return null;
+  if (value.runningSince !== null && runningSince === null) return null;
+  const durationMilliseconds = (value.mode === "focus" ? 25 : 5) * 60 * 1000;
+  const startedAtMilliseconds = Math.min(now, Date.parse(startedAt));
+  const runningSinceMilliseconds = runningSince === null
+    ? null
+    : Math.min(now, Math.max(startedAtMilliseconds, Date.parse(runningSince)));
+  return {
+    mode: value.mode,
+    taskId: typeof value.taskId === "string" && value.taskId.trim() ? value.taskId : null,
+    taskTitle: typeof value.taskTitle === "string" ? value.taskTitle : "",
+    startedAt: new Date(startedAtMilliseconds).toISOString(),
+    elapsedMilliseconds: Math.min(durationMilliseconds, Math.floor(value.elapsedMilliseconds)),
+    runningSince: runningSinceMilliseconds === null ? null : new Date(runningSinceMilliseconds).toISOString(),
+  };
 }
 
 function priorityValue(value: unknown): TaskPriority {
@@ -226,7 +247,7 @@ export function migrateAppState(value: unknown): AppState {
   const today = getDateKey();
   const tasks = arrayValue(saved.tasks).map((task) => normalizeTask(task, today)).filter((task): task is Task => task !== null);
   const tasksById = new Map(tasks.map((task) => [task.id, task]));
-  const normalizedTimer = normalizeActiveTimer(saved.activeTimer);
+  const normalizedTimer = normalizeLegacyActiveTimer(saved.activeTimer);
   const activeTimer = normalizedTimer && !normalizedTimer.taskTitle && normalizedTimer.taskId
     ? { ...normalizedTimer, taskTitle: tasksById.get(normalizedTimer.taskId)?.title ?? "" }
     : normalizedTimer;
