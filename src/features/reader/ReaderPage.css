@@ -1,14 +1,14 @@
-.focus-reader {
-  --focus-side-inset: 34px;
+.reader-page {
+  --reader-side-inset: 34px;
   height: 100%;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 var(--focus-side-inset) 0 16px;
+  padding: 0 var(--reader-side-inset) 0 16px;
   overflow: hidden;
   transition: padding-left 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.focus-reader.directory-is-collapsed {
+.reader-page.directory-is-collapsed {
   padding-left: 0;
 }
 .reader-toolbar,
@@ -157,7 +157,7 @@
   grid-template-rows: minmax(0, 1fr);
   gap: 0;
   margin-top: 0;
-  margin-right: calc(-1 * var(--focus-side-inset));
+  margin-right: calc(-1 * var(--reader-side-inset));
   overflow: hidden;
   transition: grid-template-columns 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -991,8 +991,8 @@
 
 @media (max-width: 1100px) {
 
-  .focus-reader {
-    --focus-side-inset: 20px;
+  .reader-page {
+    --reader-side-inset: 20px;
     padding-right: 20px;
     padding-left: 12px;
   }
@@ -1001,8 +1001,8 @@
 
 @media (max-width: 760px) {
 
-  .focus-reader {
-    --focus-side-inset: 14px;
+  .reader-page {
+    --reader-side-inset: 14px;
     padding: 0 14px 0 10px;
   }
 

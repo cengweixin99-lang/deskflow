@@ -4,7 +4,6 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('desktop', {
   loadState: () => ipcRenderer.invoke('state:load'),
   saveState: (state) => ipcRenderer.invoke('state:save', state),
-  showNotification: (payload) => ipcRenderer.send('notification:show', payload),
   fetchText: (url) => ipcRenderer.invoke('feed:fetch-text', url),
   openBrowser: (url) => ipcRenderer.invoke('browser:open', url),
   setBrowserBounds: (bounds) => ipcRenderer.send('browser:set-bounds', bounds),

@@ -1,5 +1,5 @@
 export type TaskPriority = "high" | "medium" | "low";
-export type TaskView = "today" | "upcoming" | "completed";
+export type TaskFilter = "all" | "pending" | "completed";
 export type TimerMode = "focus" | "break";
 export type FocusFilter = "all" | "latest" | "saved";
 export type FocusSessionStatus = "active" | "completed" | "stopped";

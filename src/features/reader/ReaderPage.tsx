@@ -17,7 +17,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import "./FocusReader.css";
+import "./ReaderPage.css";
 import {
   useEffect,
   useRef,
@@ -30,7 +30,7 @@ import {
 } from "react";
 import type { FeedArticle, FeedGroup, FeedSource, FocusFilter } from "../../types";
 
-interface FocusReaderProps {
+interface ReaderPageProps {
   feeds: FeedSource[];
   groups: FeedGroup[];
   articles: FeedArticle[];
@@ -79,7 +79,7 @@ function feedErrorMessage(error: unknown, fallback: string) {
     : message;
 }
 
-export function FocusReader({
+export function ReaderPage({
   feeds,
   groups,
   articles,
@@ -94,7 +94,7 @@ export function FocusReader({
   onRenameGroup,
   onRemoveGroup,
   onSetFeedGroup,
-}: FocusReaderProps) {
+}: ReaderPageProps) {
   const [activeFilter, setActiveFilter] = useState<FocusFilter>("all");
   const [activeFeedId, setActiveFeedId] = useState<string | null>(null);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
@@ -541,7 +541,7 @@ export function FocusReader({
   }
 
   return (
-    <section className={`focus-reader${directoryCollapsed ? " directory-is-collapsed" : ""}`}>
+    <section className={`reader-page${directoryCollapsed ? " directory-is-collapsed" : ""}`}>
       <div
         ref={readerLayoutRef}
         className={`reader-layout${directoryCollapsed ? " directory-is-collapsed" : ""}${directoryResizing ? " is-resizing" : ""}`}

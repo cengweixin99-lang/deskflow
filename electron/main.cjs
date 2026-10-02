@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, Notification } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu } = require('electron')
 const path = require('node:path')
 const {
   closeBrowser,
@@ -139,11 +139,6 @@ app.whenReady().then(() => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (win && !modalWindows.has(win)) win.close()
   })
-  // on(单向)，触发系统通知
-  ipcMain.on('notification:show', (_event, { title, body }) => {
-    if (Notification.isSupported()) new Notification({ title, body }).show()
-  })
-
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
