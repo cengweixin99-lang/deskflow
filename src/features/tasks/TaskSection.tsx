@@ -1,4 +1,4 @@
-import { CalendarClock, Check, CheckCircle2, Circle, Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, Check, CheckCircle2, Circle, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
@@ -79,20 +79,20 @@ export function TaskSection({
         <span>添加 TODO</span>
       </button>
 
-      <nav className="task-filter-tabs" aria-label="筛选今天的 TODO">
-        {(Object.keys(filterLabels) as TaskFilter[]).map((item) => (
-          <button
-            key={item}
-            className={filter === item ? "task-filter-tab active" : "task-filter-tab"}
-            type="button"
-            aria-pressed={filter === item}
-            onClick={() => onFilterChange(item)}
+      <div className="task-list-toolbar">
+        <label className={filter === "all" ? "task-filter-control" : "task-filter-control active"} title={`筛选：${filterLabels[filter]}`}>
+          <ListFilter size={17} aria-hidden="true" />
+          <select
+            value={filter}
+            aria-label={`筛选今天的 TODO，当前：${filterLabels[filter]}`}
+            onChange={(event) => onFilterChange(event.target.value as TaskFilter)}
           >
-            <span>{filterLabels[item]}</span>
-            <small>{filterCounts[item]}</small>
-          </button>
-        ))}
-      </nav>
+            {(Object.keys(filterLabels) as TaskFilter[]).map((item) => (
+              <option key={item} value={item}>{filterLabels[item]}（{filterCounts[item]}）</option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       {visibleTasks.length === 0 ? (
         <div className="empty-state">
