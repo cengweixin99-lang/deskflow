@@ -24,6 +24,10 @@
   letter-spacing: -0.045em;
   line-height: 1.2;
 }
+.review-heading h1:focus-visible {
+  outline: 2px solid #d98966;
+  outline-offset: 4px;
+}
 .review-today-button {
   min-height: 34px;
   display: inline-flex;

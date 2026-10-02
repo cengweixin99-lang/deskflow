@@ -1,5 +1,5 @@
 import { BookOpenText, CalendarDays, ChevronLeft, ChevronRight, ClipboardList, Clock3, NotebookText, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { DailyReflection, FocusSession, ReadingAction, Task } from "../../types";
 import { getDateKey } from "../../types";
 import { DailyReflectionSection } from "./DailyReflectionSection";
@@ -16,6 +16,8 @@ interface ReviewPageProps {
   focusSessions: FocusSession[];
   readingActions: ReadingAction[];
   dailyReflections: DailyReflection[];
+  selectedDate: string;
+  onSelectDate: (date: string) => void;
   onGoToTasks: () => void;
   onSaveReflection: (input: DailyReflectionInput) => boolean;
 }
@@ -29,9 +31,9 @@ function formatReviewDate(dateKey: string) {
   }).format(new Date(`${dateKey}T12:00:00`));
 }
 
-export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflections, onGoToTasks, onSaveReflection }: ReviewPageProps) {
+export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflections, selectedDate, onSelectDate, onGoToTasks, onSaveReflection }: ReviewPageProps) {
   const today = getDateKey();
-  const [selectedDate, setSelectedDate] = useState(today);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const isToday = selectedDate === today;
   const overview = useMemo(() => getDailyRecordOverview({
     date: selectedDate,
@@ -56,9 +58,14 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
     [dailyReflections, selectedDate],
   );
 
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => headingRef.current?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   function selectDate(date: string) {
     if (!isReviewDateAllowed(date, today)) return false;
-    setSelectedDate(date);
+    onSelectDate(date);
     return true;
   }
 
@@ -67,7 +74,7 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
       <header className="review-heading">
         <div>
           <p className="review-eyebrow">{isToday ? "今天 · 本地记录" : "历史回顾 · 本地记录"}</p>
-          <h1>{isToday ? "今天的回顾" : formatReviewDate(selectedDate)}</h1>
+          <h1 ref={headingRef} tabIndex={-1}>{isToday ? "今天的回顾" : formatReviewDate(selectedDate)}</h1>
         </div>
         {!isToday && (
           <button className="review-today-button" type="button" onClick={() => selectDate(today)}>

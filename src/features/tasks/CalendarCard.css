@@ -124,6 +124,42 @@
   color: #aaa9a1;
   font-size: 9px;
 }
+.history-review-action {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+}
+.history-review-button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  color: #6e6d66;
+  background: #f3f2ed;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.history-review-button:hover:not(:disabled) {
+  color: #c96b4e;
+  background: #fbf0ea;
+}
+.history-review-button:focus-visible {
+  outline: 2px solid #d98966;
+  outline-offset: 2px;
+}
+.history-review-button:disabled {
+  color: #aaa9a1;
+  background: #f5f4ef;
+  cursor: not-allowed;
+}
+.history-review-action > span {
+  color: #aaa9a1;
+  font-size: 9px;
+  line-height: 1.5;
+}
 .history-list {
   display: grid;
   gap: 3px;
