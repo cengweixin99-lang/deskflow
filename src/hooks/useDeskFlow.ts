@@ -3,12 +3,12 @@ import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/re
 import { canScheduleTaskOn } from "../features/tasks/taskDates";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
-import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskInput, TaskView } from "../types";
+import type { AppState, FeedArticle, FeedGroup, FeedSource, Task, TaskFilter, TaskInput } from "../types";
 
 export function useDeskFlow() {
   const [state, setState] = useState<AppState>(createEmptyAppState);
   const [loaded, setLoaded] = useState(false);
-  const [taskView, setTaskView] = useState<TaskView>("today");
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [feedsBusy, setFeedsBusy] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
@@ -44,27 +44,15 @@ export function useDeskFlow() {
     () => state.tasks.filter((task) => task.date === getDateKey()),
     [state.tasks],
   );
-  const upcomingTasks = useMemo(
-    () => state.tasks
-      .filter((task) => task.date > getDateKey() && !task.completed)
-      .sort((first, second) => first.date.localeCompare(second.date)),
-    [state.tasks],
-  );
-  const completedTasks = useMemo(
-    () => state.tasks
-      .filter((task) => task.completed)
-      .sort((first, second) => second.date.localeCompare(first.date)),
-    [state.tasks],
-  );
   const visibleTasks = useMemo(() => {
-    if (taskView === "upcoming") return upcomingTasks;
-    if (taskView === "completed") return completedTasks;
+    if (taskFilter === "pending") return todayTasks.filter((task) => !task.completed);
+    if (taskFilter === "completed") return todayTasks.filter((task) => task.completed);
     return todayTasks;
-  }, [completedTasks, taskView, todayTasks, upcomingTasks]);
-  const taskViewCounts: Record<TaskView, number> = {
-    today: todayTasks.length,
-    upcoming: upcomingTasks.length,
-    completed: completedTasks.length,
+  }, [taskFilter, todayTasks]);
+  const taskFilterCounts: Record<TaskFilter, number> = {
+    all: todayTasks.length,
+    pending: todayTasks.filter((task) => !task.completed).length,
+    completed: todayTasks.filter((task) => task.completed).length,
   };
 
   const completedToday = todayTasks.filter((task) => task.completed).length;
@@ -265,9 +253,9 @@ export function useDeskFlow() {
 
   return {
     state,
-    taskView,
-    setTaskView,
-    taskViewCounts,
+    taskFilter,
+    setTaskFilter,
+    taskFilterCounts,
     sidebarCollapsed,
     setSidebarCollapsed,
     visibleTasks,

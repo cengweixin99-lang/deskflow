@@ -7,7 +7,7 @@ import { WindowControls } from "./components/WindowControls";
 import { TaskSection } from "./features/tasks/TaskSection";
 import { TaskEditorModal } from "./features/tasks/TaskEditorModal";
 import { ReaderPage } from "./features/reader/ReaderPage";
-import { formatDateLabel, getDateKey } from "./types";
+import { formatDateLabel } from "./types";
 import type { Task, TaskInput } from "./types";
 import { useDeskFlow } from "./hooks/useDeskFlow";
 import { useWindowModalActive } from "./hooks/useWindowModalState";
@@ -15,7 +15,7 @@ import { useWindowModalActive } from "./hooks/useWindowModalState";
 export function App() {
   const deskFlow = useDeskFlow();
   const windowModalActive = useWindowModalActive();
-  const { state, taskView, visibleTasks, sidebarCollapsed } = deskFlow;
+  const { state, taskFilter, visibleTasks, sidebarCollapsed } = deskFlow;
   const [taskEditor, setTaskEditor] = useState<{ mode: "create"; initialDate: string } | { mode: "edit"; task: Task } | null>(null);
   const [taskNotice, setTaskNotice] = useState<{
     kind: "created" | "moved" | "completed" | "reopened";
@@ -94,13 +94,9 @@ export function App() {
     : "";
   const taskNoticeDetail = taskNotice
     ? taskNotice.kind === "completed"
-      ? `“${taskNotice.title}”已移到“已完成”`
+      ? `“${taskNotice.title}”已标记为完成`
       : taskNotice.kind === "reopened"
-        ? taskNotice.targetDate === getDateKey()
-          ? `“${taskNotice.title}”已回到“今天”`
-          : taskNotice.targetDate > getDateKey()
-            ? `“${taskNotice.title}”已回到“即将到来”`
-            : `“${taskNotice.title}”可在${formatDateLabel(taskNotice.targetDate)}的日历记录中查看`
+        ? `“${taskNotice.title}”已恢复为待完成`
         : `“${taskNotice.title}”已安排到${formatDateLabel(taskNotice.targetDate)}`
     : "";
 
@@ -112,7 +108,7 @@ export function App() {
       <main className="main-content">
         {activeSection === "tasks" ? (
           <div className="content-grid">
-            <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
+            <TaskSection filter={taskFilter} filterCounts={deskFlow.taskFilterCounts} visibleTasks={visibleTasks} progress={deskFlow.progress} onFilterChange={deskFlow.setTaskFilter} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
             <aside className="right-column">
               <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
             </aside>
