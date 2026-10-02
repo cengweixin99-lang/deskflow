@@ -1,4 +1,4 @@
-import { Check, CheckCircle2, Circle, Flag, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, CheckCircle2, Circle, ListFilter, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import "./TaskSection.css";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
@@ -30,9 +30,9 @@ const emptyStateLabels: Record<TaskFilter, string> = {
 };
 
 const priorityLabels: Record<TaskPriority, string> = {
-  high: "高优先级",
-  medium: "中优先级",
-  low: "低优先级",
+  high: "高",
+  medium: "中",
+  low: "低",
 };
 
 export function TaskSection({
@@ -214,8 +214,8 @@ function TaskItem({
       <div className="task-body">
         <div className="task-title-row">
           <button className="task-title-button" type="button" onClick={() => onEdit(task)} title="查看任务详情">{task.title}</button>
-          <span className={`task-priority ${task.priority}`} title={priorityLabels[task.priority]}>
-            <Flag size={12} aria-hidden="true" />
+          <span className={`task-priority ${task.priority}`} title={`${priorityLabels[task.priority]}优先级`}>
+            <i aria-hidden="true" />
             {priorityLabels[task.priority]}
           </span>
         </div>

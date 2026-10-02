@@ -238,6 +238,13 @@ h1 {
   font-weight: 500;
   white-space: nowrap;
 }
+.task-priority i {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  background: currentColor;
+  border-radius: 50%;
+}
 .task-priority.high {
   color: #c85d42;
 }
