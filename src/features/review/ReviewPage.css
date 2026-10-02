@@ -104,9 +104,256 @@
 .review-date-toolbar button:focus-visible,
 .review-date-field:focus-within,
 .review-empty-state button:focus-visible,
-.review-today-button:focus-visible {
+.review-today-button:focus-visible,
+.focus-trend-range button:focus-visible,
+.focus-trend-details summary:focus-visible {
   outline: 2px solid #d98966;
   outline-offset: 2px;
+}
+.focus-trend-section {
+  margin-top: 36px;
+}
+.focus-trend-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+.focus-trend-heading h2 {
+  margin: 8px 0 0;
+  color: #44433d;
+  font-size: 15px;
+}
+.focus-trend-heading > span {
+  color: #99988f;
+  font-size: 10px;
+}
+.focus-trend-range {
+  width: fit-content;
+  display: flex;
+  gap: 3px;
+  margin-bottom: 12px;
+  padding: 3px;
+  background: #eeeee8;
+  border-radius: 8px;
+}
+.focus-trend-range button {
+  min-width: 62px;
+  min-height: 32px;
+  padding: 6px 12px;
+  color: #88877f;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.focus-trend-range button:hover {
+  color: #55544e;
+  background: #f7f6f2;
+}
+.focus-trend-range button.active {
+  color: #d96d4f;
+  background: #fff;
+}
+.focus-trend-card {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e5e4de;
+  border-radius: 10px;
+}
+.focus-trend-summary {
+  display: grid;
+  grid-template-columns: 40px minmax(150px, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eeede7;
+}
+.focus-trend-summary-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: #6a9a87;
+  background: #e7f1ec;
+  border-radius: 8px;
+}
+.focus-trend-summary-primary,
+.focus-trend-summary-fact {
+  display: grid;
+  gap: 3px;
+}
+.focus-trend-summary-primary small,
+.focus-trend-summary-fact small {
+  color: #99988f;
+  font-size: 9px;
+}
+.focus-trend-summary-primary strong {
+  color: #44433e;
+  font-size: 20px;
+  font-weight: 600;
+}
+.focus-trend-summary-fact {
+  min-width: 96px;
+  padding-left: 16px;
+  border-left: 1px solid #eeede7;
+}
+.focus-trend-summary-fact strong {
+  color: #55544e;
+  font-size: 15px;
+  font-weight: 600;
+}
+.focus-trend-chart {
+  margin: 20px 0 0;
+}
+.focus-trend-chart figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.focus-trend-chart figcaption strong {
+  color: #55544e;
+  font-size: 11px;
+}
+.focus-trend-chart figcaption span {
+  color: #99988f;
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: right;
+}
+.focus-trend-bars {
+  height: 180px;
+  display: grid;
+  align-items: stretch;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.focus-trend-chart.month .focus-trend-bars {
+  gap: 3px;
+}
+.focus-trend-bars li {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 18px;
+  align-items: end;
+  gap: 6px;
+}
+.focus-trend-bar-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  background: #fafaf7;
+  border-bottom: 1px solid #dddcd5;
+  border-radius: 4px 4px 0 0;
+}
+.focus-trend-bar-track i {
+  width: min(100%, 28px);
+  display: block;
+  background: #80aa98;
+  border-radius: 4px 4px 0 0;
+}
+.focus-trend-bars li.future .focus-trend-bar-track {
+  background: repeating-linear-gradient(-45deg, #fafaf7, #fafaf7 4px, #eeede7 4px, #eeede7 5px);
+  border-bottom-style: dashed;
+}
+.focus-trend-bars li.future small {
+  color: #bbb9b1;
+}
+.focus-trend-bars li:hover .focus-trend-bar-track {
+  background: #f3f2ed;
+}
+.focus-trend-bars li:hover .focus-trend-bar-track i {
+  background: #6a9a87;
+}
+.focus-trend-bars li small {
+  min-height: 13px;
+  overflow: hidden;
+  color: #99988f;
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.focus-trend-details {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #eeede7;
+}
+.focus-trend-details summary {
+  width: fit-content;
+  color: #77766f;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+}
+.focus-trend-details ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.focus-trend-details li {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  padding: 9px 10px;
+  color: #77766f;
+  background: #fafaf7;
+  border-radius: 6px;
+  font-size: 9px;
+}
+.focus-trend-details li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.focus-trend-details li strong {
+  color: #55544e;
+  font-weight: 600;
+}
+.focus-trend-details li small,
+.focus-trend-details p {
+  color: #99988f;
+  font-size: 9px;
+}
+.focus-trend-details p {
+  margin: 10px 0 0;
+}
+.focus-trend-empty {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 36px 20px 24px;
+  color: #a3a29a;
+  text-align: center;
+}
+.focus-trend-empty svg {
+  color: #80aa98;
+}
+.focus-trend-empty strong {
+  color: #63625b;
+  font-size: 12px;
+}
+.focus-trend-empty span {
+  font-size: 10px;
+  line-height: 1.6;
+}
+.focus-trend-note {
+  margin: 10px 0 0;
+  color: #929188;
+  font-size: 9px;
+  line-height: 1.7;
 }
 .review-section-heading {
   display: flex;
@@ -494,6 +741,52 @@
   }
   .review-overview-grid {
     grid-template-columns: 1fr;
+  }
+  .focus-trend-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .focus-trend-range {
+    width: 100%;
+  }
+  .focus-trend-range button {
+    min-width: 0;
+    flex: 1;
+  }
+  .focus-trend-card {
+    padding: 16px;
+  }
+  .focus-trend-summary {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+  .focus-trend-summary-fact {
+    min-width: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid #eeede7;
+    border-left: 0;
+  }
+  .focus-trend-summary-fact:last-child {
+    padding-left: 12px;
+    border-left: 1px solid #eeede7;
+  }
+  .focus-trend-chart figcaption {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .focus-trend-chart figcaption span {
+    text-align: left;
+  }
+  .focus-trend-bars {
+    height: 150px;
+    gap: 5px;
+  }
+  .focus-trend-chart.month .focus-trend-bars {
+    gap: 2px;
+  }
+  .focus-trend-chart.month .focus-trend-bars li small {
+    font-size: 7px;
   }
   .daily-timeline-item {
     grid-template-columns: 38px 28px minmax(0, 1fr);

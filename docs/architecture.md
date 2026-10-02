@@ -68,7 +68,7 @@ tests/
 - `src/components/`：跨功能或应用外壳组件。当前只有侧栏符合这个边界。
 - `src/features/tasks/`：任务列表、日历和任务编辑相关组件。
 - `src/features/focus/`：专注计时相关组件。
-- `src/features/review/`：每日回顾页面，以及按本地日期派生记录概览、统计、行动时间轴和更新个人回顾的逻辑。
+- `src/features/review/`：每日回顾页面，以及按本地日期派生记录概览、统计、专注趋势、行动时间轴和更新个人回顾的逻辑。
 - `src/features/reader/`：订阅阅读界面以及订阅发现、解析和分页逻辑。
 - `src/hooks/useDeskFlow.ts`：当前应用状态与主要操作入口。保持现状，只有出现可独立测试且职责清晰的领域逻辑时再逐步拆分。
 - `src/lib/state.ts`：跨功能的状态默认值、归一化和迁移。
@@ -87,6 +87,7 @@ tests/
 - `tests/daily-records.mjs`：回顾日期边界和任务、专注、回顾记录概览测试。
 - `tests/daily-reflections.mjs`：每日回顾的输入校验、单日更新和撤销恢复测试。
 - `tests/daily-stats.mjs`：计划完成率、实际专注时长和提前结束记录的派生统计测试。
+- `tests/focus-trends.mjs`：当天、本周和本月专注趋势的本地日期分桶、未来日期和异常记录测试。
 - `tests/reading-actions.mjs`：文章打开事件的文章与订阅源快照测试。
 - `tests/review-timeline.mjs`：任务计划、专注和阅读行动的日期筛选与时间排序测试。
 - `tests/state-migration.cjs`：存档版本迁移、活动计时恢复和异常值过滤测试。

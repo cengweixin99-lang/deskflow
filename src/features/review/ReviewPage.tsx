@@ -5,6 +5,7 @@ import { getDateKey } from "../../types";
 import { DailyReflectionSection } from "./DailyReflectionSection";
 import { DailyStats } from "./DailyStats";
 import { DailyTimeline } from "./DailyTimeline";
+import { FocusTrendSection } from "./FocusTrendSection";
 import { getDailyRecordOverview, isReviewDateAllowed, shiftReviewDate } from "./dailyRecords";
 import type { DailyReflectionInput } from "./reflections";
 import { getDailyStats } from "./stats";
@@ -96,6 +97,8 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
           <ChevronRight size={17} />
         </button>
       </div>
+
+      <FocusTrendSection selectedDate={selectedDate} latestDate={today} focusSessions={focusSessions} />
 
       <div className="review-section-heading">
         <div>
