@@ -1,4 +1,4 @@
-import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Circle } from "lucide-react";
+import { CalendarDays, CalendarSearch, CheckCircle2, ChevronLeft, ChevronRight, Circle } from "lucide-react";
 import { useMemo, useState } from "react";
 import "./CalendarCard.css";
 import { getDateKey } from "../../types";
@@ -9,9 +9,10 @@ const weekLabels = ["一", "二", "三", "四", "五", "六", "日"];
 interface CalendarCardProps {
   tasks: Task[];
   onSelectTask: (task: Task) => void;
+  onOpenReview: (date: string) => void;
 }
 
-export function CalendarCard({ tasks, onSelectTask }: CalendarCardProps) {
+export function CalendarCard({ tasks, onSelectTask, onOpenReview }: CalendarCardProps) {
   const today = new Date();
   const todayKey = getDateKey(today);
   const [displayDate, setDisplayDate] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
@@ -23,6 +24,7 @@ export function CalendarCard({ tasks, onSelectTask }: CalendarCardProps) {
   const calendarDays = useMemo(() => Array.from({ length: firstDayOffset + daysInMonth }, (_, index) => index < firstDayOffset ? null : index - firstDayOffset + 1), [daysInMonth, firstDayOffset]);
   const selectedTasks = selectedDate ? tasks.filter((task) => task.date === selectedDate) : [];
   const selectedLabel = selectedDate ? new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric" }).format(new Date(`${selectedDate}T00:00:00`)) : "";
+  const reviewAvailable = selectedDate !== null && selectedDate <= todayKey;
 
   function shiftMonth(offset: number) {
     setDisplayDate(new Date(year, month + offset, 1));
@@ -54,7 +56,13 @@ export function CalendarCard({ tasks, onSelectTask }: CalendarCardProps) {
         <div className="history-popover">
           <div className="history-heading">
             <strong>{selectedLabel} · {selectedTasks.length} 项</strong>
-            <span>点击任务查看记录</span>
+            <span>选择任务可编辑</span>
+          </div>
+          <div className="history-review-action">
+            <button className="history-review-button" type="button" disabled={!reviewAvailable} aria-describedby={reviewAvailable ? undefined : "calendar-review-unavailable"} onClick={() => { if (selectedDate && reviewAvailable) onOpenReview(selectedDate); }}>
+              <CalendarSearch size={14} />查看完整回顾
+            </button>
+            {!reviewAvailable && <span id="calendar-review-unavailable">未来日期到当天后可查看完整回顾。</span>}
           </div>
           {selectedTasks.length === 0 ? (
             <p className="history-empty">这一天没有任务记录</p>

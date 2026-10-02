@@ -11,6 +11,7 @@ import { TaskSection } from "./features/tasks/TaskSection";
 import { TaskEditorModal } from "./features/tasks/TaskEditorModal";
 import { FocusReader } from "./features/reader/FocusReader";
 import { ReviewPage } from "./features/review/ReviewPage";
+import { isReviewDateAllowed } from "./features/review/dailyRecords";
 import type { DailyReflectionInput } from "./features/review/reflections";
 import { formatDateLabel, getDateKey } from "./types";
 import type { DailyReflection, Task, TaskInput } from "./types";
@@ -31,6 +32,7 @@ export function App() {
     input: TaskInput;
   } | null>(null);
   const [activeSection, setActiveSection] = useState<AppSection>("tasks");
+  const [reviewDate, setReviewDate] = useState(getDateKey);
   const [stopFocusModal, setStopFocusModal] = useState<{ resumeOnCancel: boolean } | null>(null);
   const [focusNoteNotice, setFocusNoteNotice] = useState<string | null>(null);
   const [reflectionNotice, setReflectionNotice] = useState<{ date: string; previous: DailyReflection | null } | null>(null);
@@ -139,6 +141,17 @@ export function App() {
     return true;
   }
 
+  function selectSection(section: AppSection) {
+    if (section === "review") setReviewDate(getDateKey());
+    setActiveSection(section);
+  }
+
+  function openReviewDate(date: string) {
+    if (!isReviewDateAllowed(date)) return;
+    setReviewDate(date);
+    setActiveSection("review");
+  }
+
   function undoDailyReflection() {
     if (!reflectionNotice) return;
     deskFlow.restoreDailyReflection(reflectionNotice.date, reflectionNotice.previous);
@@ -169,18 +182,18 @@ export function App() {
     <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}${activeSection === "focus" ? " focus-shell" : ""}`}>
       <div className="window-drag-region" aria-hidden="true" />
       <WindowControls disabled={windowModalActive} />
-      <Sidebar collapsed={sidebarCollapsed} activeSection={activeSection} onSelect={setActiveSection} onToggle={() => deskFlow.setSidebarCollapsed((collapsed) => !collapsed)} />
+      <Sidebar collapsed={sidebarCollapsed} activeSection={activeSection} onSelect={selectSection} onToggle={() => deskFlow.setSidebarCollapsed((collapsed) => !collapsed)} />
       <main className="main-content">
         {activeSection === "tasks" ? (
           <div className="content-grid">
             <TaskSection view={taskView} viewCounts={deskFlow.taskViewCounts} visibleTasks={visibleTasks} focusSessions={state.focusSessions} progress={deskFlow.progress} onViewChange={deskFlow.setTaskView} onCreateTask={(initialDate) => setTaskEditor({ mode: "create", initialDate })} onToggleTask={toggleTask} onDeleteTask={deskFlow.deleteTask} onEditTask={(task) => setTaskEditor({ mode: "edit", task })} onPostponeTask={postponeTask} />
             <aside className="right-column">
               <FocusCard timerMode={deskFlow.timerMode} secondsLeft={deskFlow.secondsLeft} timerRunning={deskFlow.timerRunning} sessionActive={deskFlow.timerSessionActive} timerRestored={deskFlow.timerRestored} tasks={deskFlow.focusTaskOptions} selectedTaskId={deskFlow.selectedFocusTaskId} selectionLocked={deskFlow.focusSelectionLocked} activeTaskId={deskFlow.activeFocusTaskId} activeTaskTitle={deskFlow.activeFocusTaskTitle} onTaskChange={deskFlow.selectFocusTask} onModeChange={deskFlow.setMode} onReset={deskFlow.resetTimer} onStop={requestStopTimer} onToggle={deskFlow.toggleTimer} />
-              <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} />
+              <CalendarCard tasks={state.tasks} onSelectTask={(task) => setTaskEditor({ mode: "edit", task })} onOpenReview={openReviewDate} />
             </aside>
           </div>
         ) : activeSection === "review" ? (
-          <ReviewPage tasks={state.tasks} focusSessions={state.focusSessions} readingActions={state.readingActions} dailyReflections={state.dailyReflections} onGoToTasks={() => setActiveSection("tasks")} onSaveReflection={saveDailyReflection} />
+          <ReviewPage tasks={state.tasks} focusSessions={state.focusSessions} readingActions={state.readingActions} dailyReflections={state.dailyReflections} selectedDate={reviewDate} onSelectDate={setReviewDate} onGoToTasks={() => selectSection("tasks")} onSaveReflection={saveDailyReflection} />
         ) : (
           <FocusReader feeds={state.feeds} groups={state.groups} articles={state.articles} feedsBusy={deskFlow.feedsBusy} subscribing={deskFlow.subscribing} onSubscribe={deskFlow.subscribeFeed} onRefresh={deskFlow.refreshFeeds} onRemoveFeed={deskFlow.removeFeed} onUpdateArticle={deskFlow.updateArticle} onOpenArticle={deskFlow.recordReadingAction} onAddGroup={deskFlow.addFeedGroup} onRenameGroup={deskFlow.renameFeedGroup} onRemoveGroup={deskFlow.removeFeedGroup} onSetFeedGroup={deskFlow.setFeedGroup} />
         )}
