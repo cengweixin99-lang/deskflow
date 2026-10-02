@@ -3,10 +3,12 @@ import { discoverFeed, fetchParsedFeed, MAX_FEED_ARTICLES } from "../features/re
 import { recordArticleOpen } from "../features/reader/readingActions";
 import { createFocusSession, updateFocusSessionNote } from "../features/focus/sessions";
 import { FOCUS_DURATION_SECONDS, formatTimerDuration, getElapsedSeconds, getRemainingSeconds, getTimerCompletionTime, getTimerDurationSeconds, getTimerProgress, pauseTimerProgress } from "../features/focus/timer";
+import { createDailyReflection, replaceDailyReflection, restoreDailyReflection as restoreDailyReflectionRecord } from "../features/review/reflections";
+import type { DailyReflectionInput } from "../features/review/reflections";
 import { canScheduleTaskOn } from "../features/tasks/taskDates";
 import { createEmptyAppState, migrateAppState } from "../lib/state";
 import { getDateKey } from "../types";
-import type { ActiveTimerState, AppState, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
+import type { ActiveTimerState, AppState, DailyReflection, FeedArticle, FeedGroup, FeedSource, FocusSession, Task, TaskInput, TaskView, TimerMode } from "../types";
 
 export function useDeskFlow() {
   const [state, setState] = useState<AppState>(createEmptyAppState);
@@ -475,6 +477,23 @@ export function useDeskFlow() {
     setFocusCompletion(null);
   }
 
+  function saveDailyReflection(input: DailyReflectionInput) {
+    const reflection = createDailyReflection(input);
+    if (!reflection) return null;
+    setState((currentState) => ({
+      ...currentState,
+      dailyReflections: replaceDailyReflection(currentState.dailyReflections, reflection),
+    }));
+    return reflection;
+  }
+
+  function restoreDailyReflection(date: string, previous: DailyReflection | null) {
+    setState((currentState) => ({
+      ...currentState,
+      dailyReflections: restoreDailyReflectionRecord(currentState.dailyReflections, date, previous),
+    }));
+  }
+
   return {
     state,
     taskView,
@@ -495,6 +514,8 @@ export function useDeskFlow() {
     focusCompletion,
     saveFocusCompletionNote,
     dismissFocusCompletion,
+    saveDailyReflection,
+    restoreDailyReflection,
     elapsedTimerSeconds: activeTimerContext ? getTimerDurationSeconds(activeTimerContext.mode) - secondsLeft : 0,
     focusSelectionLocked: activeTimerContext?.mode === "focus",
     activeFocusTaskId: activeTimerContext?.mode === "focus" ? activeTimerContext.taskId : null,
