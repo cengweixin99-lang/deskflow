@@ -131,7 +131,7 @@ export function TaskSection({
       <div className="task-list-toolbar" ref={filterControlRef}>
         <button
           ref={filterTriggerRef}
-          className={filter === "all" ? "task-filter-trigger" : "task-filter-trigger active"}
+          className="task-filter-trigger"
           type="button"
           aria-label={`筛选今天的 TODO，当前：${filterLabels[filter]}`}
           aria-haspopup="menu"
