@@ -1,0 +1,125 @@
+.daily-reflection-editor {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+.daily-reflection-editor-icon {
+  color: #9a7d67;
+  background: #f3eee9;
+}
+.daily-reflection-editor form {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+.daily-reflection-summary-field,
+.daily-reflection-score-field {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+}
+.daily-reflection-summary-field > span,
+.daily-reflection-score-field legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #85847c;
+  font-size: 10px;
+  font-weight: 600;
+}
+.daily-reflection-summary-field > span svg,
+.daily-reflection-score-field legend svg {
+  color: #d98966;
+}
+.daily-reflection-summary-field textarea {
+  width: 100%;
+  min-height: 132px;
+  resize: vertical;
+  padding: 10px 11px;
+  color: #3f3e39;
+  background: #fafaf7;
+  border: 1px solid #e5e4de;
+  border-radius: 7px;
+  outline: 0;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.daily-reflection-summary-field textarea:focus {
+  border-color: #d9a18a;
+  box-shadow: 0 0 0 2px rgba(225, 122, 91, 0.08);
+}
+.daily-reflection-summary-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -10px;
+  color: #aaa9a1;
+  font-size: 9px;
+}
+.daily-reflection-score-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+.daily-reflection-score-options label {
+  min-width: 0;
+  position: relative;
+}
+.daily-reflection-score-options input {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  opacity: 0;
+}
+.daily-reflection-score-options span {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  color: #85847c;
+  background: #fafaf7;
+  border: 1px solid #e5e4de;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.daily-reflection-score-options label:hover span {
+  color: #5d5c56;
+  border-color: #d9b7a7;
+}
+.daily-reflection-score-options label.selected span {
+  color: #c96b4e;
+  background: #fbf0ea;
+  border-color: #dfa48e;
+}
+.daily-reflection-score-options label:focus-within span {
+  outline: 2px solid #d98966;
+  outline-offset: 2px;
+}
+.daily-reflection-score-field small {
+  color: #aaa9a1;
+  font-size: 9px;
+}
+.daily-reflection-editor-error {
+  color: #c85d42;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.daily-reflection-editor .confirm-modal-footer {
+  margin-top: 4px;
+}
+
+@media (max-width: 520px) {
+  .daily-reflection-editor .confirm-modal-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+  .daily-reflection-editor .cancel-button,
+  .daily-reflection-editor .confirm-modal-primary {
+    width: 100%;
+  }
+}

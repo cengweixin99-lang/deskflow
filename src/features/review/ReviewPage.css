@@ -462,14 +462,14 @@
   min-height: 34px;
   margin-top: 8px;
   padding: 7px 12px;
-  color: #fff;
-  background: #e17a5b;
+  color: #6e6d66;
+  background: #f3f2ed;
   border-radius: 7px;
   font-size: 10px;
   font-weight: 600;
 }
 .review-empty-state button:hover {
-  background: #d96d4f;
+  background: #e9e8e2;
 }
 @media (max-width: 900px) {
   .review-overview-grid {

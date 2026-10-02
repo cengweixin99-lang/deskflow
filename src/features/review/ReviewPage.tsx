@@ -2,9 +2,11 @@ import { BookOpenText, CalendarDays, ChevronLeft, ChevronRight, ClipboardList, C
 import { useMemo, useState } from "react";
 import type { DailyReflection, FocusSession, ReadingAction, Task } from "../../types";
 import { getDateKey } from "../../types";
+import { DailyReflectionSection } from "./DailyReflectionSection";
 import { DailyStats } from "./DailyStats";
 import { DailyTimeline } from "./DailyTimeline";
 import { getDailyRecordOverview, isReviewDateAllowed, shiftReviewDate } from "./dailyRecords";
+import type { DailyReflectionInput } from "./reflections";
 import { getDailyStats } from "./stats";
 import { getDailyTimelineItems } from "./timeline";
 import "./ReviewPage.css";
@@ -15,6 +17,7 @@ interface ReviewPageProps {
   readingActions: ReadingAction[];
   dailyReflections: DailyReflection[];
   onGoToTasks: () => void;
+  onSaveReflection: (input: DailyReflectionInput) => boolean;
 }
 
 function formatReviewDate(dateKey: string) {
@@ -26,7 +29,7 @@ function formatReviewDate(dateKey: string) {
   }).format(new Date(`${dateKey}T12:00:00`));
 }
 
-export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflections, onGoToTasks }: ReviewPageProps) {
+export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflections, onGoToTasks, onSaveReflection }: ReviewPageProps) {
   const today = getDateKey();
   const [selectedDate, setSelectedDate] = useState(today);
   const isToday = selectedDate === today;
@@ -48,6 +51,10 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
     tasks,
     focusSessions,
   }), [focusSessions, selectedDate, tasks]);
+  const selectedReflection = useMemo(
+    () => dailyReflections.find((reflection) => reflection.date === selectedDate) ?? null,
+    [dailyReflections, selectedDate],
+  );
 
   function selectDate(date: string) {
     if (!isReviewDateAllowed(date, today)) return false;
@@ -109,6 +116,8 @@ export function ReviewPage({ tasks, focusSessions, readingActions, dailyReflecti
           <span className="review-overview-copy"><small>每日回顾</small><strong>{overview.hasReflection ? "已保存" : "未填写"}</strong><span>本机每日回顾记录</span></span>
         </article>
       </div>
+
+      <DailyReflectionSection date={selectedDate} reflection={selectedReflection} onSave={onSaveReflection} />
 
       {overview.hasRecords ? (
         <>
